@@ -1,0 +1,59 @@
+.login {
+  margin: 12px 0;
+  display: grid;
+  gap: 8px;
+}
+
+.login .field {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.login .label {
+  min-width: 72px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.login .actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn.ghost {
+  border-color: #ddd;
+  color: #333;
+  background: transparent;
+}
+
+.login .input {
+  padding: 6px 8px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.btn {
+  padding: 6px 10px;
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+}
+
+.btn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.login-message {
+  color: #0a7f58;
+  font-weight: 600;
+  margin-top: 6px;
+  background: rgba(10, 127, 88, 0.08);
+  padding: 8px 10px;
+  border-radius: 6px;
+}

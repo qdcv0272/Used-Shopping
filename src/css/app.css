@@ -1,0 +1,63 @@
+.card {
+  padding: 24px;
+}
+
+.read-the-docs {
+  color: var(--muted);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.app-header nav a {
+  text-decoration: none;
+  color: inherit;
+  padding: 4px 8px;
+}
+
+.app-header nav a.active {
+  font-weight: 700;
+  border-bottom: 2px solid currentColor;
+}
+
+.counter {
+  border: 1px solid #f0f0f0;
+  padding: 12px;
+  display: inline-block;
+  border-radius: 4px;
+  background: transparent;
+}
+
+.counter-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.counter-controls button {
+  padding: 4px 8px;
+  border: 1px solid #eee;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.counter-set {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.counter-input {
+  padding: 6px 8px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  width: 64px;
+  text-align: center;
+}
