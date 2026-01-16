@@ -15,10 +15,23 @@ export default function Signup() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [confirmError, setConfirmError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isIdChecked, setIsIdChecked] = useState(false);
+  const [isEmailChecked, setIsEmailChecked] = useState(false);
+  const [isNicknameChecked, setIsNicknameChecked] = useState(false);
+  const [idCheckMessage, setIdCheckMessage] = useState<string | null>(null);
+  const [emailCheckMessage, setEmailCheckMessage] = useState<string | null>(
+    null
+  );
+  const [nicknameCheckMessage, setNicknameCheckMessage] = useState<
+    string | null
+  >(null);
+  const [nickname, setNickname] = useState("");
+  const [nicknameError, setNicknameError] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
   const idRef = useRef<HTMLInputElement | null>(null);
+  const nicknameRef = useRef<HTMLInputElement | null>(null);
   const emailRef = useRef<HTMLInputElement | null>(null);
   const passwordRef = useRef<HTMLInputElement | null>(null);
   const confirmRef = useRef<HTMLInputElement | null>(null);
@@ -29,6 +42,8 @@ export default function Signup() {
   }, []);
 
   const validateId = (value = id) => {
+    // 이미 체크된 상태에서 수정 불가능하므로 유효성 검사 패스 처리 가능하지만,
+    // 로직상 유지.
     if (!value) {
       setIdError("아이디를 입력하세요.");
       return false;
@@ -45,6 +60,19 @@ export default function Signup() {
       return false;
     }
     setIdError(null);
+    return true;
+  };
+
+  const validateNickname = (value = nickname) => {
+    if (!value) {
+      setNicknameError("닉네임을 입력하세요.");
+      return false;
+    }
+    if (value.length < 2) {
+      setNicknameError("닉네임은 2자 이상이어야 합니다.");
+      return false;
+    }
+    setNicknameError(null);
     return true;
   };
 
@@ -93,23 +121,77 @@ export default function Signup() {
     return true;
   };
 
+  const checkIdDuplicate = () => {
+    if (!validateId()) return;
+    // TODO: 실제 서버 중복 체크 API 호출
+    setIdCheckMessage("사용 가능한 아이디입니다.");
+    setIsIdChecked(true);
+    idRef.current?.blur();
+  };
+
+  const checkEmailDuplicate = () => {
+    if (!validateEmail()) return;
+    // TODO: 실제 서버 중복 체크 API 호출
+    setEmailCheckMessage("사용 가능한 이메일입니다.");
+    setIsEmailChecked(true);
+    emailRef.current?.blur();
+  };
+
+  const checkNicknameDuplicate = () => {
+    if (!validateNickname()) return;
+    // TODO: 실제 서버 중복 체크 API 호출
+    setNicknameCheckMessage("사용 가능한 닉네임입니다.");
+    setIsNicknameChecked(true);
+    nicknameRef.current?.blur();
+  };
+
   const handleSignup = async () => {
     // try/catch/finally에서 ReferenceError와 UI 정체를 방지하기 위해 완료 플래그를 추적합니다.
     let finished = false;
+
+    if (!isIdChecked) {
+      setIdError("아이디 중복 확인을 해주세요.");
+      idRef.current?.focus();
+      return;
+    }
+    if (!isNicknameChecked) {
+      setNicknameError("닉네임 중복 확인을 해주세요.");
+      nicknameRef.current?.focus();
+      return;
+    }
+    if (!isEmailChecked) {
+      setEmailError("이메일 중복 확인을 해주세요.");
+      emailRef.current?.focus();
+      return;
+    }
 
     try {
       // run validation helpers (regex-based, inline errors)
       setMessage(null);
       const validId = validateId();
+      const validNickname = validateNickname();
       const validEmail = validateEmail();
       const validPassword = validatePassword();
       const validConfirm = validateConfirm();
-      if (!validId || !validEmail || !validPassword || !validConfirm) {
+
+      if (
+        !validId ||
+        !validNickname ||
+        !validEmail ||
+        !validPassword ||
+        !validConfirm
+      ) {
         setMessage("입력값을 확인하세요.");
         // 첫 번째 오류 필드로 포커스 이동
         if (!validId) {
           idRef.current?.focus();
           idRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        } else if (!validNickname) {
+          nicknameRef.current?.focus();
+          nicknameRef.current?.scrollIntoView({
             behavior: "smooth",
             block: "center",
           });
@@ -152,10 +234,16 @@ export default function Signup() {
       // `fail` helper removed — 실패는 catch에서 직접 처리합니다.
 
       const { registerUser } = await import("../firebase");
-      const user = await registerUser(id, password, email || undefined, {
-        displayName: id,
+      const user = await registerUser(
         id,
-      });
+        password,
+        email || undefined,
+        nickname,
+        {
+          displayName: nickname,
+          id,
+        }
+      );
       console.log("registerUser resolved", {
         uid: user?.uid,
         email: user?.email,
@@ -254,36 +342,174 @@ export default function Signup() {
 
         <div className="field role-field">
           <span className="label">아이디</span>
-          <input
-            id="signup-id"
-            ref={idRef}
-            className={`input ${idError ? "invalid" : ""}`}
-            value={id}
-            onChange={(e) => {
-              setId(e.target.value);
-              if (idError) validateId();
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              gap: "8px",
+              alignItems: "center",
             }}
-            onBlur={() => validateId()}
-            placeholder="사용할 아이디를 입력하세요"
-          />
-          {idError && <small className="error-text">{idError}</small>}
+          >
+            <input
+              id="signup-id"
+              ref={idRef}
+              className={`input ${idError ? "invalid" : ""}`}
+              value={id}
+              onChange={(e) => {
+                setId(e.target.value);
+                setIsIdChecked(false); // 수정하면 체크 상태 초기화
+                setIdCheckMessage(null); // 메시지 초기화
+                if (idError) validateId();
+              }}
+              onBlur={() => validateId()}
+              readOnly={isIdChecked}
+              placeholder="사용할 아이디를 입력하세요"
+              style={{
+                flex: 1,
+                backgroundColor: isIdChecked ? "#f0f0f0" : "white",
+              }}
+            />
+            <button
+              type="button"
+              className="btn ghost"
+              onClick={checkIdDuplicate}
+              disabled={isIdChecked}
+              style={{
+                fontSize: "0.8rem",
+                padding: "6px 8px",
+                whiteSpace: "nowrap",
+                backgroundColor: isIdChecked ? "#eee" : "transparent",
+                cursor: isIdChecked ? "default" : "pointer",
+                color: isIdChecked ? "#888" : "inherit",
+                borderColor: isIdChecked ? "#ddd" : "#ddd",
+              }}
+            >
+              {isIdChecked ? "완료" : "중복확인"}
+            </button>
+          </div>
+          {!idError && idCheckMessage && (
+            <small
+              className="success-text"
+              style={{ color: "green", fontSize: "0.85rem", marginTop: "4px" }}
+            >
+              {idCheckMessage}
+            </small>
+          )}
         </div>
 
         <div className="field">
-          <span className="label">이메일</span>
-          <input
-            id="signup-email"
-            ref={emailRef}
-            className={`input ${emailError ? "invalid" : ""}`}
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (emailError) validateEmail();
+          <span className="label">닉네임</span>
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              gap: "8px",
+              alignItems: "center",
             }}
-            onBlur={() => validateEmail()}
-            placeholder="비밀번호/아이디 찾기용 이메일을 입력하세요"
-          />
+          >
+            <input
+              id="signup-nickname"
+              ref={nicknameRef}
+              className={`input ${nicknameError ? "invalid" : ""}`}
+              value={nickname}
+              onChange={(e) => {
+                setNickname(e.target.value);
+                setIsNicknameChecked(false);
+                setNicknameCheckMessage(null);
+                if (nicknameError) validateNickname();
+              }}
+              onBlur={() => validateNickname()}
+              readOnly={isNicknameChecked}
+              placeholder="사용할 닉네임을 입력하세요"
+              style={{
+                flex: 1,
+                backgroundColor: isNicknameChecked ? "#f0f0f0" : "white",
+              }}
+            />
+            <button
+              type="button"
+              className="btn ghost"
+              onClick={checkNicknameDuplicate}
+              disabled={isNicknameChecked}
+              style={{
+                fontSize: "0.8rem",
+                padding: "6px 8px",
+                whiteSpace: "nowrap",
+                backgroundColor: isNicknameChecked ? "#eee" : "transparent",
+                cursor: isNicknameChecked ? "default" : "pointer",
+                color: isNicknameChecked ? "#888" : "inherit",
+                borderColor: isNicknameChecked ? "#ddd" : "#ddd",
+              }}
+            >
+              {isNicknameChecked ? "완료" : "중복확인"}
+            </button>
+          </div>
+          {nicknameError && (
+            <small className="error-text">{nicknameError}</small>
+          )}
+          {!nicknameError && nicknameCheckMessage && (
+            <small className="success-text" style={{ color: "green" }}>
+              {nicknameCheckMessage}
+            </small>
+          )}
+        </div>
+
+        <div className="field role-field">
+          <span className="label">이메일</span>
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              gap: "8px",
+              alignItems: "center",
+            }}
+          >
+            <input
+              id="signup-email"
+              ref={emailRef}
+              className={`input ${emailError ? "invalid" : ""}`}
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setIsEmailChecked(false);
+                setEmailCheckMessage(null);
+                if (emailError) validateEmail();
+              }}
+              onBlur={() => validateEmail()}
+              readOnly={isEmailChecked}
+              placeholder="비밀번호/아이디 찾기용 이메일을 입력하세요"
+              style={{
+                flex: 1,
+                backgroundColor: isEmailChecked ? "#f0f0f0" : "white",
+              }}
+            />
+            <button
+              type="button"
+              className="btn ghost"
+              onClick={checkEmailDuplicate}
+              disabled={isEmailChecked}
+              style={{
+                fontSize: "0.8rem",
+                padding: "6px 8px",
+                whiteSpace: "nowrap",
+                backgroundColor: isEmailChecked ? "#eee" : "transparent",
+                cursor: isEmailChecked ? "default" : "pointer",
+                color: isEmailChecked ? "#888" : "inherit",
+                borderColor: isEmailChecked ? "#ddd" : "#ddd",
+              }}
+            >
+              {isEmailChecked ? "완료" : "중복확인"}
+            </button>
+          </div>
           {emailError && <small className="error-text">{emailError}</small>}
+          {!emailError && emailCheckMessage && (
+            <small
+              className="success-text"
+              style={{ color: "green", fontSize: "0.85rem", marginTop: "4px" }}
+            >
+              {emailCheckMessage}
+            </small>
+          )}
         </div>
 
         <div className="field">

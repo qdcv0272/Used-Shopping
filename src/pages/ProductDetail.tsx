@@ -1,20 +1,20 @@
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { getProduct, type Product } from "../firebase";
 import "../css/productDetail.css";
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const [product, setProduct] = useState<Product | null>(null);
 
-  // 샘플 데이터 (실제로는 API에서 가져와야 함)
-  const product = {
-    id: id,
-    title: "test",
-    category: "유아동",
-    price: 10000,
-    description: `테스트 입니다`,
-    seller: "test",
-    likes: 1,
-    views: 8,
-  };
+  useEffect(() => {
+    if (id) {
+      getProduct(id).then(setProduct);
+    }
+  }, [id]);
+
+  if (!product)
+    return <div style={{ color: "white", padding: "2rem" }}>Loading...</div>;
 
   return (
     <div className="product-detail-container">
@@ -22,13 +22,16 @@ export default function ProductDetail() {
         {/* 왼쪽 컬럼: 이미지 + 사용자 정보 */}
         <div className="left-column">
           <div className="detail-image-wrapper">
-            {/* 실제 이미지가 있다면 <img> 태그 사용 */}
-            <span>상품 이미지</span>
+            {product.images && product.images.length > 0 ? (
+              <img src={product.images[0]} alt={product.title} />
+            ) : (
+              <span>상품 이미지</span>
+            )}
           </div>
 
           <div className="user-profile-section">
             <div className="user-avatar">👤</div>
-            <div className="user-name">{product.seller}</div>
+            <div className="user-name">판매자 ({product.sellerId})</div>
           </div>
         </div>
 

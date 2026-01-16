@@ -17,7 +17,11 @@ import {
   where,
   getDocs,
   getDoc,
+  addDoc,
+  orderBy,
+  limit,
 } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 type UserWithFlag = User & { _profileSaved?: boolean };
 
@@ -34,6 +38,67 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
+
+// --- Storage Helpers ---
+export async function uploadImage(file: File, folder = "images") {
+  const storageRef = ref(storage, `${folder}/${Date.now()}_${file.name}`);
+  const snapshot = await uploadBytes(storageRef, file);
+  const downloadURL = await getDownloadURL(snapshot.ref);
+  return downloadURL;
+}
+
+// --- Firestore Helpers ---
+
+// Product interface
+export interface Product {
+  id?: string;
+  title: string;
+  description: string;
+  price: number;
+  category: string;
+  images: string[];
+  sellerId: string;
+  createdAt: number;
+  views: number;
+  likes: number;
+}
+
+export async function addProduct(productData: Omit<Product, "id">) {
+  const productsRef = collection(db, "products");
+  const docRef = await addDoc(productsRef, productData);
+  return docRef.id;
+}
+
+export async function getProducts(category?: string) {
+  const productsRef = collection(db, "products");
+  let q;
+  if (category && category !== "전체") {
+    q = query(
+      productsRef,
+      where("category", "==", category),
+      orderBy("createdAt", "desc"),
+      limit(20)
+    );
+  } else {
+    q = query(productsRef, orderBy("createdAt", "desc"), limit(20));
+  }
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Product[];
+}
+
+export async function getProduct(id: string) {
+  const docRef = doc(db, "products", id);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    return { id: docSnap.id, ...docSnap.data() } as Product;
+  } else {
+    return null;
+  }
+}
 
 // Firebase Auth로 가입 후 Firestore에 기본 프로필을 저장하는 헬퍼
 // 변경: id(사용자 아이디)와 선택적 email을 받아, auth에는 이메일 형태의 주소(authEmail)를 사용합니다.
@@ -41,6 +106,7 @@ export async function registerUser(
   id: string,
   password: string,
   email?: string,
+  nickname?: string,
   profile: Record<string, unknown> = {}
 ): Promise<UserWithFlag> {
   // 실제 Auth에 사용할 이메일을 결정합니다. (사용자가 이메일을 입력하지 않으면 가상 이메일 사용)
@@ -78,6 +144,7 @@ export async function registerUser(
         id,
         authEmail,
         email: email ?? null,
+        nickname: nickname ?? id,
         createdAt: new Date().toISOString(),
         ...profile,
       });

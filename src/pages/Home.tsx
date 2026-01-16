@@ -1,16 +1,32 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
+import { getProducts, type Product } from "../firebase";
 import "../css/home.css";
 
 export default function Home() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState("전체");
+  const [products, setProducts] = useState<Product[]>([]);
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
 
   const categoryListRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getProducts(
+          category === "전체" ? undefined : category
+        );
+        setProducts(data);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      }
+    };
+    fetchProducts();
+  }, [category]);
 
   useEffect(() => {
     if (categoryListRef.current) {
@@ -56,21 +72,12 @@ export default function Home() {
     "기타",
   ];
 
-  // 샘플 데이터
-  const items = Array.from({ length: 4 }).map((_, i) => ({
-    id: i,
-    title: `중고 아이템 샘플 ${i + 1}`,
-    price: (i + 1) * 10000,
-    region: "서울 강남구",
-    time: "1시간 전",
-  }));
-
   return (
     <main className="home-container">
       {/* 1. 검색 창 */}
       <div className="search-section">
         <div className="search-bar">
-          <button className="search-dropdown">중고거래 ▼</button>
+          <button className="search-dropdown">중고거래</button>
           <input
             type="text"
             className="search-input"
@@ -117,20 +124,27 @@ export default function Home() {
         <section className="product-section">
           <h2 className="section-title">오늘의 추천 매물</h2>
           <div className="product-grid">
-            {items.map((item) => (
+            {products.map((item) => (
               <article
                 key={item.id}
                 className="product-card"
                 onClick={() => navigate(`/products/${item.id}`)}
               >
-                <div className="product-image">📦</div>
+                <div className="product-image">
+                  {item.images && item.images.length > 0 ? (
+                    <img src={item.images[0]} alt={item.title} />
+                  ) : (
+                    "📦"
+                  )}
+                </div>
                 <div className="product-info">
                   <h3 className="product-title">{item.title}</h3>
                   <div className="product-price">
                     {item.price.toLocaleString()}원
                   </div>
                   <div className="product-meta">
-                    {item.region} · {item.time}
+                    {/* TODO: Add region/time if available in Product model */}
+                    {new Date(item.createdAt).toLocaleDateString()}
                   </div>
                 </div>
               </article>
