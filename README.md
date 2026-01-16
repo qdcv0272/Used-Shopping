@@ -4,6 +4,17 @@
 
 ---
 
+## 🛠️ 사용 기술 스택
+
+- Vite + TypeScript + React 19 (SWC 플러그인)
+- React Router v7
+- Zustand 전역 상태관리
+- Firebase Authentication + Firestore (회원가입/로그인, 프로필 저장)
+- ESLint (React Hooks, React Refresh), TypeScript
+- CSS (프로젝트 내 커스텀 스타일 시트)
+
+---
+
 ## 🚦 Router (리액트 라우터) 설명
 
 이 프로젝트는 `react-router-dom`을 사용하여 페이지 간 탐색을 구현합니다. 주요 라우트는 다음과 같습니다.

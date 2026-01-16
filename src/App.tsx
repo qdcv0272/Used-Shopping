@@ -1,17 +1,18 @@
 import "./css/app.css";
 import { NavLink, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-import Products from "./pages/Products";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
+import ProductDetail from "./pages/ProductDetail";
+import ProductRegister from "./pages/ProductRegister";
 
 function App() {
   return (
     <div className="App">
       <header className="app-header">
-        <h1>Used Shop</h1>
+        <h1>사과 중고 마켓</h1>
         <nav>
           <NavLink
             to="/"
@@ -22,13 +23,6 @@ function App() {
           </NavLink>
           {" | "}
           <NavLink
-            to="/products"
-            className={({ isActive }) => (isActive ? "active" : "")}
-          >
-            Products
-          </NavLink>
-          {" | "}
-          <NavLink
             to="/about"
             className={({ isActive }) => (isActive ? "active" : "")}
           >
@@ -36,10 +30,24 @@ function App() {
           </NavLink>
           {" | "}
           <NavLink
+            to="/products/new"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            상품 등록
+          </NavLink>
+          {" | "}
+          <NavLink
             to="/login"
             className={({ isActive }) => (isActive ? "active" : "")}
           >
-            Login
+            로그인
+          </NavLink>
+          {" | "}
+          <NavLink
+            to="/signup"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            회원가입
           </NavLink>
         </nav>
       </header>
@@ -47,7 +55,8 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/products" element={<Products />} />
+          <Route path="/products/new" element={<ProductRegister />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/about" element={<About />} />

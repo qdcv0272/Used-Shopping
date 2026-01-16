@@ -1,8 +1,68 @@
+import { useParams } from "react-router-dom";
+import "../css/productDetail.css";
+
 export default function ProductDetail() {
+  const { id } = useParams();
+
+  // 샘플 데이터 (실제로는 API에서 가져와야 함)
+  const product = {
+    id: id,
+    title: "test",
+    category: "유아동",
+    price: 10000,
+    description: `테스트 입니다`,
+    seller: "test",
+    likes: 1,
+    views: 8,
+  };
+
   return (
-    <div>
-      <h2>Product detail removed</h2>
-      <p>This page was removed when the REST example was removed.</p>
+    <div className="product-detail-container">
+      <div className="detail-layout">
+        {/* 왼쪽 컬럼: 이미지 + 사용자 정보 */}
+        <div className="left-column">
+          <div className="detail-image-wrapper">
+            {/* 실제 이미지가 있다면 <img> 태그 사용 */}
+            <span>상품 이미지</span>
+          </div>
+
+          <div className="user-profile-section">
+            <div className="user-avatar">👤</div>
+            <div className="user-name">{product.seller}</div>
+          </div>
+        </div>
+
+        {/* 오른쪽 컬럼: 상품 정보 */}
+        <div className="right-column">
+          {/* 상품명 */}
+          <h1 className="detail-product-title">{product.title}</h1>
+
+          <hr className="detail-divider" />
+
+          {/* 카테고리 & 가격 */}
+          <div className="detail-meta-info">
+            <span className="detail-category">{product.category}</span>
+            <span style={{ color: "#ddd" }}>|</span>
+            <span className="detail-price">
+              {product.price.toLocaleString()}원
+            </span>
+          </div>
+
+          <hr className="detail-divider" />
+
+          {/* 상품 설명 */}
+          <div className="detail-description">{product.description}</div>
+
+          <hr className="detail-divider" />
+
+          {/* 관심, 조회수 */}
+          <div className="detail-stats">
+            <span>관심 {product.likes}</span>
+            <span>·</span>
+            <span>조회 {product.views}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

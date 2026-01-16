@@ -6,10 +6,20 @@
   --radius: 6px;
 }
 
+/* 스크롤바 숨기기 */
+::-webkit-scrollbar {
+  display: none;
+}
+html,
+body {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 32px;
+  padding: 0 32px 32px;
   text-align: center;
 }
 

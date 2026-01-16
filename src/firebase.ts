@@ -8,7 +8,16 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import type { User } from "firebase/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  getDoc,
+} from "firebase/firestore";
 
 type UserWithFlag = User & { _profileSaved?: boolean };
 
@@ -27,19 +36,30 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 // Firebase Auth로 가입 후 Firestore에 기본 프로필을 저장하는 헬퍼
+// 변경: id(사용자 아이디)와 선택적 email을 받아, auth에는 이메일 형태의 주소(authEmail)를 사용합니다.
 export async function registerUser(
-  email: string,
+  id: string,
   password: string,
+  email?: string,
   profile: Record<string, unknown> = {}
 ): Promise<UserWithFlag> {
-  // 인증 사용자 생성
-  const userCred = await createUserWithEmailAndPassword(auth, email, password);
+  // 실제 Auth에 사용할 이메일을 결정합니다. (사용자가 이메일을 입력하지 않으면 가상 이메일 사용)
+  const authEmail = email && email.length ? email : `${id}@noemail.local`;
+
+  // 인증 사용자 생성 (authEmail 사용)
+  const userCred = await createUserWithEmailAndPassword(
+    auth,
+    authEmail,
+    password
+  );
   const user = userCred.user;
 
   // 회원가입 흐름 디버깅용 콘솔 로그
   console.log("Firebase auth user created", {
     uid: user.uid,
     email: user.email,
+    authEmail,
+    id,
   });
 
   // Firestore에 프로필을 쓰되, 실패해도 예외를 던지지 않습니다.
@@ -52,9 +72,12 @@ export async function registerUser(
         }
       );
 
+      // Firestore에 id, authEmail, (사용자 제공) email, uid 등을 저장합니다.
       const write = setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
-        email: user.email,
+        id,
+        authEmail,
+        email: email ?? null,
         createdAt: new Date().toISOString(),
         ...profile,
       });
@@ -78,7 +101,9 @@ export async function registerUser(
     // 프로필 저장 성공 로그
     console.log("User profile saved in Firestore", {
       uid: user.uid,
-      email: user.email,
+      id,
+      authEmail,
+      email: email ?? null,
     });
     (user as UserWithFlag)._profileSaved = true;
   } catch (e) {
@@ -91,7 +116,33 @@ export async function registerUser(
   return user;
 }
 
-// 로그인 헬퍼
-export async function loginUser(email: string, password: string) {
-  return await signInWithEmailAndPassword(auth, email, password);
+// 로그인 헬퍼 — 변경: id로 사용자를 조회해 auth에 사용된 이메일(authEmail)로 로그인합니다.
+export async function loginUser(id: string, password: string) {
+  // users 컬렉션에서 id로 문서를 조회합니다.
+  const usersQuery = query(collection(db, "users"), where("id", "==", id));
+  const snap = await getDocs(usersQuery);
+  if (snap.empty) {
+    throw new Error("존재하지 않는 id입니다.");
+  }
+  // 첫번째 매칭 사용
+  const userDoc = snap.docs[0];
+  const data = userDoc.data() as { authEmail?: string; email?: string };
+  const authEmail = data.authEmail ?? data.email ?? `${id}@noemail.local`;
+
+  // 실제 로그인
+  return await signInWithEmailAndPassword(auth, authEmail, password);
+}
+
+// Get user profile document from Firestore
+export async function getUserProfile(uid: string) {
+  const d = await getDoc(doc(db, "users", uid));
+  if (!d.exists()) return null;
+  return d.data();
+}
+
+// Update user's role (merge)
+export async function updateUserRole(uid: string, role: "owner" | "guest") {
+  const ref = doc(db, "users", uid);
+  await setDoc(ref, { role }, { merge: true });
+  return { uid, role };
 }
