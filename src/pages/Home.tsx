@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
-import { getProducts, type Product } from "../firebase";
+import { getProducts, searchProducts, type Product } from "../firebase";
 import "../css/home.css";
 
 export default function Home() {
@@ -17,6 +17,14 @@ export default function Home() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        if (searchTerm) {
+          // If search term exists, don't fetch by category unless specified logic requires it.
+          // For now, let's keep search separate or integrated.
+          // If the user is typing, we might not want to fetch on every keystroke unless debounced.
+          // But here I'll rely on explicit search action usually.
+          return;
+        }
+
         const data = await getProducts(
           category === "전체" ? undefined : category
         );
@@ -26,7 +34,27 @@ export default function Home() {
       }
     };
     fetchProducts();
-  }, [category]);
+  }, [category]); // Removed searchTerm dependency to avoid auto-fetching on type, waiting for action
+
+  const handleSearch = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!searchTerm.trim()) {
+      // If empty, reload category
+      const data = await getProducts(
+        category === "전체" ? undefined : category
+      );
+      setProducts(data);
+      return;
+    }
+
+    try {
+      setCategory("전체");
+      const results = await searchProducts(searchTerm);
+      setProducts(results);
+    } catch (error) {
+      console.error("Search failed", error);
+    }
+  };
 
   useEffect(() => {
     if (categoryListRef.current) {
@@ -76,8 +104,10 @@ export default function Home() {
     <main className="home-container">
       {/* 1. 검색 창 */}
       <div className="search-section">
-        <div className="search-bar">
-          <button className="search-dropdown">중고거래</button>
+        <form className="search-bar" onSubmit={handleSearch}>
+          <button type="button" className="search-dropdown">
+            중고거래
+          </button>
           <input
             type="text"
             className="search-input"
@@ -85,10 +115,10 @@ export default function Home() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button className="search-btn" aria-label="검색">
+          <button type="submit" className="search-btn" aria-label="검색">
             🔍
           </button>
-        </div>
+        </form>
       </div>
 
       <div className="main-layout">
@@ -112,7 +142,10 @@ export default function Home() {
               <li
                 key={cat}
                 className={`category-item ${category === cat ? "active" : ""}`}
-                onClick={() => setCategory(cat)}
+                onClick={() => {
+                  setCategory(cat);
+                  setSearchTerm("");
+                }}
               >
                 {cat}
               </li>

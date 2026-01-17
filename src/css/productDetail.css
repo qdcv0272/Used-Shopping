@@ -129,3 +129,53 @@
     gap: 24px;
   }
 }
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background-color: transparent;
+  padding: 0;
+  margin-top: 24px;
+}
+
+.chat-btn,
+.like-btn {
+  flex: 1;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.chat-btn {
+  background-color: #5bc0eb; /* Primary action color */
+  border: none;
+  color: #fff;
+}
+
+.chat-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.chat-btn:active {
+  transform: translateY(0);
+}
+
+.detail-stats {
+  margin-bottom: 8px;
+  color: #888;
+}
+
+.product-detail-container {
+  /* Ensure container background is white based on design */
+  background-color: #fff;
+}

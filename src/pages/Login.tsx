@@ -71,61 +71,86 @@ export default function Login({ onClose }: LoginProps) {
 
   if (user) {
     return (
-      <section className="login" aria-label="login section">
-        <div className="field">
-          <span className="label">id :</span>
-          <span className="input" aria-label="user-id">
-            {user.displayName ?? user.email}
-          </span>
-        </div>
+      <div className="login-container">
+        <div className="login-card">
+          <h2 className="login-title">이미 로그인되었습니다</h2>
+          <div className="logged-in-info">
+            <span className="user-text">
+              {user.displayName ?? user.email ?? "사용자"}님 반가워요!
+            </span>
+          </div>
 
-        <div className="actions">
-          <button className="btn" onClick={handleLogout}>
-            logout
-          </button>
-        </div>
+          <div className="login-actions">
+            <button className="login-btn logout" onClick={handleLogout}>
+              로그아웃
+            </button>
+            <button
+              className="login-btn secondary"
+              onClick={() => navigate("/")}
+            >
+              홈으로 가기
+            </button>
+          </div>
 
-        {message && <p className="login-message">{message}</p>}
-      </section>
+          {message && <p className="login-message success">{message}</p>}
+        </div>
+      </div>
     );
   }
 
   return (
-    <>
-      <section className="login" aria-label="login section">
-        <div className="field">
-          <span className="label">id :</span>
-          <input
-            id="login-id"
-            aria-label="id"
-            className="input"
-            value={id}
-            onChange={(e) => setId(e.target.value)}
-            placeholder="Enter id"
-          />
-        </div>
+    <div className="login-container">
+      <div className="login-card">
+        <h2 className="login-title">로그인</h2>
+        <p className="login-subtitle">사과 중고 마켓에 오신 것을 환영합니다</p>
 
-        <div className="field">
-          <span className="label">password :</span>
-          <input
-            id="login-password"
-            aria-label="password"
-            className="input"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter password"
-          />
-        </div>
+        <form
+          className="login-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}
+        >
+          <div className="form-group">
+            <label htmlFor="login-id">아이디</label>
+            <input
+              id="login-id"
+              type="text"
+              placeholder="아이디를 입력하세요"
+              value={id}
+              onChange={(e) => setId(e.target.value)}
+              className="login-input"
+            />
+          </div>
 
-        <div className="actions">
-          <button className="btn" onClick={handleLogin}>
-            login
+          <div className="form-group">
+            <label htmlFor="login-password">비밀번호</label>
+            <input
+              id="login-password"
+              type="password"
+              placeholder="비밀번호를 입력하세요"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="login-input"
+            />
+          </div>
+
+          <button type="submit" className="login-btn primary">
+            로그인
           </button>
+        </form>
+
+        <div className="login-footer">
+          <p>
+            계정이 없으신가요?{" "}
+            <span className="link-text" onClick={() => navigate("/signup")}>
+              회원가입
+            </span>
+          </p>
         </div>
 
-        {message && <p className="login-message">{message}</p>}
-      </section>
-    </>
+        {message && <div className="login-message-box">{message}</div>}
+      </div>
+    </div>
   );
 }

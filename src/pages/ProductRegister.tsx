@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect } from "react";
+import { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { Draggable } from "gsap/all";
@@ -31,11 +31,22 @@ export default function ProductRegister() {
   const [price, setPrice] = useState("");
   const [images, setImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState(auth.currentUser);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((u) => {
+      setUser(u);
+      setIsLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
   useLayoutEffect(() => {
+    if (isLoading || !user) return;
     const ctx = gsap.context(() => {
       Draggable.create(imageRefs.current, {
         type: "x",
@@ -139,6 +150,31 @@ export default function ProductRegister() {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div
+        className="product-register-container"
+        style={{ textAlign: "center", padding: "4rem 0" }}
+      >
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="product-register-container auth-required">
+        <h2>내 물건 팔기</h2>
+        <div className="auth-message-wrapper">
+          <p>로그인이 필요한 서비스입니다.</p>
+          <button className="auth-btn" onClick={() => navigate("/login")}>
+            로그인 하러 가기
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="product-register-container">

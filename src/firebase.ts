@@ -20,6 +20,9 @@ import {
   addDoc,
   orderBy,
   limit,
+  onSnapshot,
+  updateDoc,
+  increment,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -73,21 +76,48 @@ export async function addProduct(productData: Omit<Product, "id">) {
 export async function getProducts(category?: string) {
   const productsRef = collection(db, "products");
   let q;
+  // 카테고리 필터 시 복합 인덱스 없이 작동하도록 orderBy 제거 후 클라이언트 정렬
   if (category && category !== "전체") {
-    q = query(
-      productsRef,
-      where("category", "==", category),
-      orderBy("createdAt", "desc"),
-      limit(20)
-    );
+    q = query(productsRef, where("category", "==", category));
   } else {
+    // 전체 조회는 단일 필드 정렬이므로 인덱스 불필요 (자동 생성됨)
     q = query(productsRef, orderBy("createdAt", "desc"), limit(20));
   }
+
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map((doc) => ({
+  const products = querySnapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
   })) as Product[];
+
+  // 카테고리 필터일 경우 여기서 최신순 정렬
+  if (category && category !== "전체") {
+    products.sort((a, b) => b.createdAt - a.createdAt);
+  }
+
+  return products;
+}
+
+export async function searchProducts(term: string) {
+  const productsRef = collection(db, "products");
+  // Simple Title Search (Client-side filtering for broader matching)
+  // For production, use Algolia/Elasticsearch
+  const q = query(productsRef, orderBy("createdAt", "desc"), limit(100)); // Fetch more for search
+
+  const querySnapshot = await getDocs(q);
+  const allProducts = querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Product[];
+
+  if (!term.trim()) return allProducts;
+
+  const lowerTerm = term.toLowerCase();
+  return allProducts.filter(
+    (p) =>
+      p.title.toLowerCase().includes(lowerTerm) ||
+      p.description.toLowerCase().includes(lowerTerm)
+  );
 }
 
 export async function getProduct(id: string) {
@@ -98,6 +128,13 @@ export async function getProduct(id: string) {
   } else {
     return null;
   }
+}
+
+export async function incrementView(id: string) {
+  const docRef = doc(db, "products", id);
+  await updateDoc(docRef, {
+    views: increment(1),
+  });
 }
 
 // Firebase Auth로 가입 후 Firestore에 기본 프로필을 저장하는 헬퍼
@@ -212,4 +249,174 @@ export async function updateUserRole(uid: string, role: "owner" | "guest") {
   const ref = doc(db, "users", uid);
   await setDoc(ref, { role }, { merge: true });
   return { uid, role };
+}
+
+export async function getProductsBySeller(sellerId: string) {
+  const productsRef = collection(db, "products");
+  // 복합 인덱스 문제 방지를 위해 orderBy 제거 후 메모리 정렬
+  const q = query(productsRef, where("sellerId", "==", sellerId));
+  const querySnapshot = await getDocs(q);
+  const products = querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Product[];
+
+  // 최신순 정렬
+  return products.sort((a, b) => b.createdAt - a.createdAt);
+}
+
+// --- Chat Helpers ---
+
+export interface ChatMessage {
+  id?: string;
+  senderId: string;
+  text: string;
+  createdAt: number;
+}
+
+export interface ChatRoom {
+  id: string;
+  participants: string[]; // [uid1, uid2]
+  productId: string;
+  lastMessage: string;
+  updatedAt: number;
+  unreadCounts?: Record<string, number>; // { userId: count }
+}
+
+// 1. 채팅방 생성 또는 기존 방 가져오기
+export async function startChat(sellerId: string, productId: string) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("로그인이 필요합니다.");
+  if (user.uid === sellerId)
+    throw new Error("자신의 상품에는 채팅할 수 없습니다.");
+
+  const chatsRef = collection(db, "chats");
+
+  // 이미 존재하는 채팅방인지 확인 (간단하게 productId와 participants로 확인)
+  // Firestore 쿼리 제약상, participants 배열 포함 여부를 완벽히 체크하기 어려울 수 있으니
+  // 여기서는 '내가 참여중이고' + 'productId가 일치하는' 방을 찾은 뒤, 상대방(sellerId)이 있는지 JS로 확인합니다.
+  const q = query(
+    chatsRef,
+    where("productId", "==", productId),
+    where("participants", "array-contains", user.uid)
+  );
+
+  const snap = await getDocs(q);
+  const existingChat = snap.docs.find((doc) => {
+    const data = doc.data();
+    return data.participants.includes(sellerId);
+  });
+
+  if (existingChat) {
+    return existingChat.id;
+  }
+
+  // 없으면 새로 생성
+  const newChatRef = await addDoc(chatsRef, {
+    participants: [user.uid, sellerId],
+    productId,
+    lastMessage: "",
+    updatedAt: Date.now(),
+    unreadCounts: { [user.uid]: 0, [sellerId]: 0 },
+  });
+
+  return newChatRef.id;
+}
+
+// 2. 메시지 전송
+export async function sendMessage(chatId: string, text: string) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("로그인이 필요합니다.");
+
+  // 메시지 서브컬렉션에 추가
+  const messagesRef = collection(db, "chats", chatId, "messages");
+  await addDoc(messagesRef, {
+    senderId: user.uid,
+    text,
+    createdAt: Date.now(),
+  });
+
+  // 채팅방 정보 가져오기 (참여자 확인용)
+  const chatRef = doc(db, "chats", chatId);
+  const chatSnap = await getDoc(chatRef);
+
+  let newUnreadCounts = {};
+  if (chatSnap.exists()) {
+    const data = chatSnap.data() as ChatRoom;
+    const participants = data.participants || [];
+    const currentCounts = data.unreadCounts || {};
+
+    // 나를 제외한 모든 참가자의 안 읽은 수 +1
+    newUnreadCounts = { ...currentCounts };
+    participants.forEach((uid) => {
+      if (uid !== user.uid) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (newUnreadCounts as any)[uid] = (currentCounts[uid] || 0) + 1;
+      }
+    });
+  }
+
+  // 채팅방 메타데이터 업데이트 (마지막 메시지, 시간, 안읽은 수)
+  await setDoc(
+    chatRef,
+    {
+      lastMessage: text,
+      updatedAt: Date.now(),
+      unreadCounts: newUnreadCounts,
+    },
+    { merge: true }
+  );
+}
+
+// 읽음 처리 함수 추가
+export async function markChatAsRead(chatId: string) {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const chatRef = doc(db, "chats", chatId);
+  // 내 unreadCount를 0으로 초기화
+  // 점 표기법(unreadCounts.userId)을 사용하여 특정 필드만 업데이트
+  await setDoc(
+    chatRef,
+    {
+      [`unreadCounts.${user.uid}`]: 0,
+    },
+    { merge: true }
+  );
+}
+
+// 3. 메시지 목록 실시간 구독 (onSnapshot 사용)
+export function subscribeToMessages(
+  chatId: string,
+  callback: (msgs: ChatMessage[]) => void
+) {
+  const messagesRef = collection(db, "chats", chatId, "messages");
+  // 시간순 정렬
+  const q = query(messagesRef, orderBy("createdAt", "asc"));
+
+  return onSnapshot(q, (snapshot) => {
+    const msgs = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as ChatMessage[];
+    callback(msgs);
+  });
+}
+
+// 4. 내 채팅방 목록 가져오기
+export async function getMyChats() {
+  const user = auth.currentUser;
+  if (!user) return [];
+
+  const chatsRef = collection(db, "chats");
+  const q = query(chatsRef, where("participants", "array-contains", user.uid));
+
+  const snap = await getDocs(q);
+  const chats = snap.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as ChatRoom[];
+
+  // 최신 업데이트 순 정렬
+  return chats.sort((a, b) => b.updatedAt - a.updatedAt);
 }

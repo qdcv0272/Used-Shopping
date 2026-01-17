@@ -397,7 +397,7 @@ export default function Signup() {
           )}
         </div>
 
-        <div className="field">
+        <div className="field role-field">
           <span className="label">닉네임</span>
           <div
             style={{

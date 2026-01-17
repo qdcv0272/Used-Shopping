@@ -1,17 +1,78 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getProduct, type Product } from "../firebase";
+import { useEffect, useState, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  getProduct,
+  getUserProfile,
+  auth,
+  startChat,
+  incrementView,
+  type Product,
+} from "../firebase";
+import ChatModal from "../components/ChatModal";
 import "../css/productDetail.css";
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
+  const [sellerNickname, setSellerNickname] = useState("");
+  const processedIdRef = useRef<string | null>(null);
+
+  // Chat State
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [currentChatId, setCurrentChatId] = useState("");
 
   useEffect(() => {
     if (id) {
-      getProduct(id).then(setProduct);
+      // 이미 처리된 ID라면 조회수 증가 건너뜀 (Strict Mode 대응)
+      if (processedIdRef.current !== id) {
+        processedIdRef.current = id;
+        incrementView(id).catch((err) =>
+          console.error("Failed to increment view", err)
+        );
+      }
+      
+      // 상품 정보 가져오기
+      getProduct(id).then((data) => {
+        setProduct(data);
+      });
     }
   }, [id]);
+
+  useEffect(() => {
+    if (product?.sellerId) {
+      getUserProfile(product.sellerId).then((profile) => {
+        if (profile && profile.nickname) {
+          setSellerNickname(profile.nickname as string);
+        }
+      });
+    }
+  }, [product]);
+
+  const handleChat = async () => {
+    if (!product) return;
+    const user = auth.currentUser;
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
+    if (user.uid === product.sellerId) {
+      alert("본인의 상품에는 채팅할 수 없습니다.");
+      return;
+    }
+
+    try {
+      // 채팅방 생성 또는 가져오기
+      const chatId = await startChat(product.sellerId, product.id!);
+      setCurrentChatId(chatId);
+      setIsChatOpen(true);
+    } catch (error) {
+      console.error("Failed to start chat:", error);
+      alert("채팅방을 열 수 없습니다.");
+    }
+  };
+
 
   if (!product)
     return <div style={{ color: "white", padding: "2rem" }}>Loading...</div>;
@@ -31,7 +92,9 @@ export default function ProductDetail() {
 
           <div className="user-profile-section">
             <div className="user-avatar">👤</div>
-            <div className="user-name">판매자 ({product.sellerId})</div>
+            <div className="user-name">
+              판매자 : {sellerNickname || product.sellerId}
+            </div>
           </div>
         </div>
 
@@ -58,14 +121,31 @@ export default function ProductDetail() {
 
           <hr className="detail-divider" />
 
-          {/* 관심, 조회수 */}
+          {/* 조회수 */}
           <div className="detail-stats">
-            <span>관심 {product.likes}</span>
-            <span>·</span>
             <span>조회 {product.views}</span>
+          </div>
+
+          <hr className="detail-divider" />
+
+          {/* Action Buttons */}
+          <div className="action-buttons">
+            <button className="chat-btn" onClick={handleChat}>
+              채팅하기
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Chat Modal */}
+      {isChatOpen && (
+        <ChatModal
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          chatId={currentChatId}
+          sellerName={sellerNickname || "판매자"}
+        />
+      )}
     </div>
   );
 }
