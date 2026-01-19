@@ -4,9 +4,13 @@ import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import "../css/login.css";
 import "../css/signup.css";
-import { AuthInput, AuthInputWithCheck } from "../components/AuthInput";
 
-export default function Signup() {
+// [리팩토링] ㅠㅜㅍ
+// 이 파일은 학습용으로 컴포넌트를 분리하기 전의 원본 형태를 재현한 파일입니다.
+// 실제 프로젝트에서는 Signup.tsx를 사용하고 있으며, 중복되는 Input 로직을
+// components/AuthInput.tsx로 분리하여 유지보수성을 높였습니다.
+
+export default function SignupClone() {
   const [id, setId] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,8 +48,6 @@ export default function Signup() {
   }, []);
 
   const validateId = (value = id) => {
-    // 이미 체크된 상태에서 수정 불가능하므로 유효성 검사 패스 처리 가능하지만,
-    // 로직상 유지.
     if (!value) {
       setIdError("아이디를 입력하세요.");
       return false;
@@ -148,7 +150,6 @@ export default function Signup() {
   };
 
   const handleSignup = async () => {
-    // try/catch/finally에서 ReferenceError와 UI 정체를 방지하기 위해 완료 플래그를 추적합니다.
     let finished = false;
 
     if (!isIdChecked) {
@@ -168,7 +169,6 @@ export default function Signup() {
     }
 
     try {
-      // run validation helpers (regex-based, inline errors)
       setMessage(null);
       const validId = validateId();
       const validNickname = validateNickname();
@@ -187,34 +187,14 @@ export default function Signup() {
         // 첫 번째 오류 필드로 포커스 이동
         if (!validId) {
           idRef.current?.focus();
-          idRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
         } else if (!validNickname) {
           nicknameRef.current?.focus();
-          nicknameRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
         } else if (!validEmail) {
           emailRef.current?.focus();
-          emailRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
         } else if (!validPassword) {
           passwordRef.current?.focus();
-          passwordRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
         } else {
           confirmRef.current?.focus();
-          confirmRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
         }
         return;
       }
@@ -222,18 +202,16 @@ export default function Signup() {
       setIsSubmitting(true);
       setMessage("회원가입 중...");
       console.log("Signing up", { id });
+
       const succeed = (msg: string) => {
         if (finished) return;
         finished = true;
-        // 디버그: 최종 메시지와 네비게이션 타이밍을 명확히 로그에 남깁니다.
         console.log("Final message set:", msg);
         setMessage(msg);
         setTimeout(() => {
-          console.log("Navigating to /login after success");
           navigate("/login");
-        }, 3500); // 메시지가 보일 충분한 시간 확보
+        }, 3500);
       };
-      // `fail` helper removed — 실패는 catch에서 직접 처리합니다.
 
       const { registerUser } = await import("../firebase");
       const user = await registerUser(
@@ -246,34 +224,22 @@ export default function Signup() {
           id,
         },
       );
-      console.log("registerUser resolved", {
-        uid: user?.uid,
-        email: user?.email,
-        profileSaved: (user as { _profileSaved?: boolean } | null)
-          ?._profileSaved,
-      });
 
-      // post-registration 단계가 예기치 않게 실패하는지 확인하기 위해 안전하게 감싼다.
       try {
-        // 표시용으로는 제공한 이메일을 우선 사용하고 없으면 id를 사용합니다.
         const profileSaved =
           (user as { _profileSaved?: boolean } | null)?._profileSaved !== false;
-        console.log("Profile saved flag:", profileSaved);
 
         const shown = profileSaved ? (email && email.length ? email : id) : id;
         const finalMessage = profileSaved
           ? `회원가입 완료: ${shown}`
           : `회원가입 완료: ${shown} (프로필 저장 실패)`;
 
-        // 즉시 메시지 설정 후 성공 처리 — 컴포넌트가 언마운트 되지 않는 한 메시지가 보입니다.
         setMessage(finalMessage);
-        console.log("Signup success message set", { finalMessage });
-        // 브라우저 알림 요청/표시 (권한이 있으면 데스크톱 알림)
+
         import("../utils/notify").then(({ showBrowserNotification }) => {
           showBrowserNotification("회원가입 완료", { body: finalMessage });
         });
 
-        // Prevent automatic login after creating the account: sign out the newly created auth session
         try {
           await signOut(auth);
         } catch (e) {
@@ -282,7 +248,6 @@ export default function Signup() {
 
         succeed(finalMessage);
 
-        // 혹시 렌더링이 지연되거나 상태가 덮어쓰이는 경우 대비한 보강 타이머
         setTimeout(() => succeed(finalMessage), 4000);
       } catch (e) {
         console.error("Post-registration error", e);
@@ -291,10 +256,8 @@ export default function Signup() {
     } catch (err: unknown) {
       console.error("Signup error", err);
 
-      // FirebaseError에는 `code`가 있으므로 우선 코드로 매핑합니다.
       const code = (err as { code?: string })?.code;
       const raw = err instanceof Error ? err.message : String(err);
-      console.error("Signup error details", { code, raw, err });
 
       const mapped = (() => {
         if (code === "auth/email-already-in-use" || /EMAIL_EXISTS/i.test(raw))
@@ -307,25 +270,16 @@ export default function Signup() {
           return "이메일/비밀번호 가입이 Firebase 콘솔에서 활성화되어 있지 않습니다.";
         if (code === "auth/weak-password")
           return "비밀번호가 약합니다. 더 긴 비밀번호를 사용하세요.";
-        if (code === "auth/invalid-api-key")
-          return "Firebase API 키가 유효하지 않습니다. 환경 변수(VITE_FIREBASE_*)를 확인하세요.";
-
-        // 기본: 코드가 있으면 코드를 접두사로, 아니면 원문 메시지를 사용
+        // ... (나머지 에러 매핑)
         return `${code ? `[${code}] ` : ""}${
           raw || "회원가입 중 오류가 발생했습니다."
         }`;
       })();
 
       setMessage(mapped);
-      console.log("Signup failed", { code, raw: mapped });
     } finally {
-      // 항상 제출 상태 해제
       setIsSubmitting(false);
-      // 최종 안전장치: 예기치 않게 finished가 false인 채로 남지 않도록 함
       if (!finished) {
-        console.log(
-          "Signup flow finished without succeed/fail flag; ensuring message is visible",
-        );
         finished = true;
         setMessage(
           (prev) => prev || "회원가입 처리가 완료되었는지 확인해 주세요.",
@@ -342,94 +296,163 @@ export default function Signup() {
         </h2>
         <p className="auth-sub">간편하게 계정을 만들어보세요</p>
 
-        <AuthInputWithCheck
-          label="아이디"
-          id="signup-id"
-          ref={idRef}
-          value={id}
-          onChange={(e) => {
-            setId(e.target.value);
-            setIsIdChecked(false);
-            setIdCheckMessage(null);
-            if (idError) validateId();
-          }}
-          onBlur={() => validateId()}
-          placeholder="사용할 아이디를 입력하세요"
-          error={idError}
-          isChecked={isIdChecked}
-          checkMessage={idCheckMessage}
-          onCheck={checkIdDuplicate}
-        />
+        {/* 1. 아이디 입력 필드 (AuthInputWithCheck 분해) */}
+        <div className="field role-field">
+          <span className="label">아이디</span>
+          <div className="signup-input-group">
+            <input
+              id="signup-id"
+              ref={idRef}
+              className={`input signup-input-field ${idError ? "invalid" : ""} ${
+                isIdChecked ? "checked" : ""
+              }`}
+              value={id}
+              onChange={(e) => {
+                setId(e.target.value);
+                setIsIdChecked(false);
+                setIdCheckMessage(null);
+                if (idError) validateId();
+              }}
+              onBlur={() => validateId()}
+              readOnly={isIdChecked}
+              placeholder="사용할 아이디를 입력하세요"
+            />
+            <button
+              type="button"
+              className={`btn ghost duplicate-check-btn ${
+                isIdChecked ? "checked" : ""
+              }`}
+              onClick={checkIdDuplicate}
+              disabled={isIdChecked}
+            >
+              {isIdChecked ? "완료" : "중복확인"}
+            </button>
+          </div>
+          {idError && <small className="error-text">{idError}</small>}
+          {!idError && idCheckMessage && (
+            <small className="success-text">{idCheckMessage}</small>
+          )}
+        </div>
 
-        <AuthInputWithCheck
-          label="닉네임"
-          id="signup-nickname"
-          ref={nicknameRef}
-          value={nickname}
-          onChange={(e) => {
-            setNickname(e.target.value);
-            setIsNicknameChecked(false);
-            setNicknameCheckMessage(null);
-            if (nicknameError) validateNickname();
-          }}
-          onBlur={() => validateNickname()}
-          placeholder="사용할 닉네임을 입력하세요"
-          error={nicknameError}
-          isChecked={isNicknameChecked}
-          checkMessage={nicknameCheckMessage}
-          onCheck={checkNicknameDuplicate}
-        />
+        {/* 2. 닉네임 입력 필드 (AuthInputWithCheck 분해) */}
+        <div className="field role-field">
+          <span className="label">닉네임</span>
+          <div className="signup-input-group">
+            <input
+              id="signup-nickname"
+              ref={nicknameRef}
+              className={`input signup-input-field ${
+                nicknameError ? "invalid" : ""
+              } ${isNicknameChecked ? "checked" : ""}`}
+              value={nickname}
+              onChange={(e) => {
+                setNickname(e.target.value);
+                setIsNicknameChecked(false);
+                setNicknameCheckMessage(null);
+                if (nicknameError) validateNickname();
+              }}
+              onBlur={() => validateNickname()}
+              readOnly={isNicknameChecked}
+              placeholder="사용할 닉네임을 입력하세요"
+            />
+            <button
+              type="button"
+              className={`btn ghost duplicate-check-btn ${
+                isNicknameChecked ? "checked" : ""
+              }`}
+              onClick={checkNicknameDuplicate}
+              disabled={isNicknameChecked}
+            >
+              {isNicknameChecked ? "완료" : "중복확인"}
+            </button>
+          </div>
+          {nicknameError && (
+            <small className="error-text">{nicknameError}</small>
+          )}
+          {!nicknameError && nicknameCheckMessage && (
+            <small className="success-text">{nicknameCheckMessage}</small>
+          )}
+        </div>
 
-        <AuthInputWithCheck
-          label="이메일"
-          id="signup-email"
-          ref={emailRef}
-          value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-            setIsEmailChecked(false);
-            setEmailCheckMessage(null);
-            if (emailError) validateEmail();
-          }}
-          onBlur={() => validateEmail()}
-          placeholder="비밀번호/아이디 찾기용 이메일을 입력하세요"
-          error={emailError}
-          isChecked={isEmailChecked}
-          checkMessage={emailCheckMessage}
-          onCheck={checkEmailDuplicate}
-        />
+        {/* 3. 이메일 입력 필드 (AuthInputWithCheck 분해) */}
+        <div className="field role-field">
+          <span className="label">이메일</span>
+          <div className="signup-input-group">
+            <input
+              id="signup-email"
+              ref={emailRef}
+              className={`input signup-input-field ${
+                emailError ? "invalid" : ""
+              } ${isEmailChecked ? "checked" : ""}`}
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setIsEmailChecked(false);
+                setEmailCheckMessage(null);
+                if (emailError) validateEmail();
+              }}
+              onBlur={() => validateEmail()}
+              readOnly={isEmailChecked}
+              placeholder="비밀번호/아이디 찾기용 이메일을 입력하세요"
+            />
+            <button
+              type="button"
+              className={`btn ghost duplicate-check-btn ${
+                isEmailChecked ? "checked" : ""
+              }`}
+              onClick={checkEmailDuplicate}
+              disabled={isEmailChecked}
+            >
+              {isEmailChecked ? "완료" : "중복확인"}
+            </button>
+          </div>
+          {emailError && <small className="error-text">{emailError}</small>}
+          {!emailError && emailCheckMessage && (
+            <small className="success-text">{emailCheckMessage}</small>
+          )}
+        </div>
 
-        <AuthInput
-          label="비밀번호"
-          id="signup-password"
-          ref={passwordRef}
-          type="password"
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            if (passwordError) validatePassword();
-            if (confirm) validateConfirm();
-          }}
-          onBlur={() => validatePassword()}
-          placeholder="비밀번호를 입력하세요"
-          error={passwordError}
-          hint="영문·숫자 포함 6자 이상 권장"
-        />
+        {/* 4. 비밀번호 입력 필드 (AuthInput 분해) */}
+        <div className="field">
+          <span className="label">비밀번호</span>
+          <input
+            id="signup-password"
+            ref={passwordRef}
+            type="password"
+            className={`input ${passwordError ? "invalid" : ""}`}
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (passwordError) validatePassword();
+              if (confirm) validateConfirm();
+            }}
+            onBlur={() => validatePassword()}
+            placeholder="비밀번호를 입력하세요"
+          />
+          {passwordError && (
+            <small className="error-text">{passwordError}</small>
+          )}
+          <small className="hint">영문·숫자 포함 6자 이상 권장</small>
+        </div>
 
-        <AuthInput
-          label="비밀번호 확인"
-          id="signup-confirm"
-          ref={confirmRef}
-          type="password"
-          value={confirm}
-          onChange={(e) => {
-            setConfirm(e.target.value);
-            if (confirmError) validateConfirm();
-          }}
-          onBlur={() => validateConfirm()}
-          placeholder="비밀번호를 다시 입력하세요"
-          error={confirmError}
-        />
+        {/* 5. 비밀번호 확인 입력 필드 (AuthInput 분해) */}
+        <div className="field">
+          <span className="label">비밀번호 확인</span>
+          <input
+            id="signup-confirm"
+            ref={confirmRef}
+            type="password"
+            className={`input ${confirmError ? "invalid" : ""}`}
+            value={confirm}
+            onChange={(e) => {
+              setConfirm(e.target.value);
+              if (confirmError) validateConfirm();
+            }}
+            onBlur={() => validateConfirm()}
+            placeholder="비밀번호를 다시 입력하세요"
+          />
+          {confirmError && <small className="error-text">{confirmError}</small>}
+        </div>
 
         <div className="actions">
           <button

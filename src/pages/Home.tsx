@@ -15,45 +15,31 @@ export default function Home() {
   const categoryListRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
+    console.log("카테고리 변경 함");
     const fetchProducts = async () => {
-      try {
-        if (searchTerm) {
-          // If search term exists, don't fetch by category unless specified logic requires it.
-          // For now, let's keep search separate or integrated.
-          // If the user is typing, we might not want to fetch on every keystroke unless debounced.
-          // But here I'll rely on explicit search action usually.
-          return;
-        }
+      if (searchTerm) return;
 
-        const data = await getProducts(
-          category === "전체" ? undefined : category
-        );
-        setProducts(data);
-      } catch (error) {
-        console.error("Failed to fetch products", error);
-      }
+      const data = await getProducts(
+        category === "전체" ? undefined : category,
+      );
+      setProducts(data);
     };
     fetchProducts();
-  }, [category]); // Removed searchTerm dependency to avoid auto-fetching on type, waiting for action
+  }, [category]); // 카테고리 변경 시마다 실행
 
   const handleSearch = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!searchTerm.trim()) {
-      // If empty, reload category
       const data = await getProducts(
-        category === "전체" ? undefined : category
+        category === "전체" ? undefined : category,
       );
       setProducts(data);
       return;
     }
 
-    try {
-      setCategory("전체");
-      const results = await searchProducts(searchTerm);
-      setProducts(results);
-    } catch (error) {
-      console.error("Search failed", error);
-    }
+    setCategory("전체");
+    const results = await searchProducts(searchTerm);
+    setProducts(results);
   };
 
   useEffect(() => {
@@ -78,13 +64,13 @@ export default function Home() {
         });
       }
     }
-  }, [isCategoryOpen]);
+  }, [isCategoryOpen]); // 카테고리 열림/닫힘 애니메이션
 
-  const toggleCategory = () => {
+  function toggleCategory() {
     if (isAnimating) return;
     setIsAnimating(true);
     setIsCategoryOpen((prev) => !prev);
-  };
+  }
 
   const categories = [
     "전체",
@@ -176,7 +162,6 @@ export default function Home() {
                     {item.price.toLocaleString()}원
                   </div>
                   <div className="product-meta">
-                    {/* TODO: Add region/time if available in Product model */}
                     {new Date(item.createdAt).toLocaleDateString()}
                   </div>
                 </div>

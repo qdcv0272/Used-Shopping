@@ -1,6 +1,7 @@
+// 이 유틸리티 함수는 브라우저 알림(Notification)을 표시하는 기능을 제공합니다.
 export function showBrowserNotification(
   title: string,
-  options?: NotificationOptions
+  options?: NotificationOptions,
 ) {
   if (typeof window === "undefined" || !("Notification" in window))
     return false;
@@ -19,9 +20,6 @@ export function showBrowserNotification(
       });
     }
   } catch (e) {
-    // Silently ignore (some browsers or environments may throw)
-    // Caller can rely on in-app message as fallback
-    // eslint-disable-next-line no-console
     console.error("Notification API error", e);
   }
 

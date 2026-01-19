@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
-import { signOut, onAuthStateChanged, type User } from "firebase/auth";
+import { onAuthStateChanged, type User } from "firebase/auth";
 
 import "../css/login.css";
 
@@ -24,21 +24,10 @@ export default function Login({ onClose }: LoginProps) {
   }, []);
 
   useEffect(() => {
-    // If already logged in and opened as modal, close it
     if (user && onClose) {
       onClose();
     }
   }, [user, onClose]);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      setMessage("로그아웃 되었습니다.");
-    } catch (err) {
-      console.error("Logout failed", err);
-      setMessage("로그아웃 실패");
-    }
-  };
 
   const handleLogin = async () => {
     try {
@@ -53,11 +42,10 @@ export default function Login({ onClose }: LoginProps) {
 
       // Success
       setMessage(
-        `로그인 되었습니다: ${cred.user.displayName ?? cred.user.email}`
+        `로그인 되었습니다: ${cred.user.displayName ?? cred.user.email}`,
       );
       setPassword("");
 
-      // If called as a modal, close modal; otherwise navigate to home
       if (onClose) {
         onClose();
       } else {
@@ -68,35 +56,6 @@ export default function Login({ onClose }: LoginProps) {
       setMessage(msg || "로그인 실패");
     }
   };
-
-  if (user) {
-    return (
-      <div className="login-container">
-        <div className="login-card">
-          <h2 className="login-title">이미 로그인되었습니다</h2>
-          <div className="logged-in-info">
-            <span className="user-text">
-              {user.displayName ?? user.email ?? "사용자"}님 반가워요!
-            </span>
-          </div>
-
-          <div className="login-actions">
-            <button className="login-btn logout" onClick={handleLogout}>
-              로그아웃
-            </button>
-            <button
-              className="login-btn secondary"
-              onClick={() => navigate("/")}
-            >
-              홈으로 가기
-            </button>
-          </div>
-
-          {message && <p className="login-message success">{message}</p>}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="login-container">

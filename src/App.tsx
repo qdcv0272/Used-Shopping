@@ -10,6 +10,7 @@ import MyPage from "./pages/MyPage";
 import NotFound from "./pages/NotFound";
 import ProductDetail from "./pages/ProductDetail";
 import ProductRegister from "./pages/ProductRegister";
+// 각 페이지 컴포넌트들을 임포트
 
 function App() {
   const [user, setUser] = useState<User | null>(null);

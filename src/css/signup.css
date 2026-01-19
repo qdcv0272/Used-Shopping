@@ -1,0 +1,38 @@
+.signup-input-group {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.signup-input-field {
+  flex: 1;
+  background-color: white;
+}
+
+.signup-input-field.checked {
+  background-color: #f0f0f0;
+}
+
+.duplicate-check-btn {
+  font-size: 0.8rem;
+  padding: 6px 8px;
+  white-space: nowrap;
+  background-color: transparent;
+  cursor: pointer;
+  color: inherit;
+  border-color: #ddd;
+}
+
+.duplicate-check-btn.checked {
+  background-color: #eee;
+  cursor: default;
+  color: #888;
+  border-color: #ddd;
+}
+
+.success-text {
+  color: green;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}

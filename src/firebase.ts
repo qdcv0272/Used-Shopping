@@ -7,7 +7,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import type { User } from "firebase/auth";
+import type { User } from "firebase/auth"; // User 타입 임포트
 import {
   getFirestore,
   doc,
@@ -23,11 +23,13 @@ import {
   onSnapshot,
   updateDoc,
   increment,
-} from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+} from "firebase/firestore"; // Firestore 모듈
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Storage 모듈
+// 사용자 객체에 프로필 저장 여부 플래그 추가
 
-type UserWithFlag = User & { _profileSaved?: boolean };
+type UserWithFlag = User & { _profileSaved?: boolean }; // User 타입 확장
 
+// 환경변수에서 설정 불러오기
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -43,7 +45,7 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-// --- Storage Helpers ---
+// 이미지 업로드 헬퍼
 export async function uploadImage(file: File, folder = "images") {
   const storageRef = ref(storage, `${folder}/${Date.now()}_${file.name}`);
   const snapshot = await uploadBytes(storageRef, file);
@@ -51,9 +53,7 @@ export async function uploadImage(file: File, folder = "images") {
   return downloadURL;
 }
 
-// --- Firestore Helpers ---
-
-// Product interface
+// 프로덕트 관련 헬퍼 함수들
 export interface Product {
   id?: string;
   title: string;
@@ -67,12 +67,14 @@ export interface Product {
   likes: number;
 }
 
+// 새 프로덕트 추가
 export async function addProduct(productData: Omit<Product, "id">) {
   const productsRef = collection(db, "products");
   const docRef = await addDoc(productsRef, productData);
   return docRef.id;
 }
 
+// 카테고리별 또는 전체 프로덕트 조회
 export async function getProducts(category?: string) {
   const productsRef = collection(db, "products");
   let q;
@@ -116,7 +118,7 @@ export async function searchProducts(term: string) {
   return allProducts.filter(
     (p) =>
       p.title.toLowerCase().includes(lowerTerm) ||
-      p.description.toLowerCase().includes(lowerTerm)
+      p.description.toLowerCase().includes(lowerTerm),
   );
 }
 
@@ -144,7 +146,7 @@ export async function registerUser(
   password: string,
   email?: string,
   nickname?: string,
-  profile: Record<string, unknown> = {}
+  profile: Record<string, unknown> = {},
 ): Promise<UserWithFlag> {
   // 실제 Auth에 사용할 이메일을 결정합니다. (사용자가 이메일을 입력하지 않으면 가상 이메일 사용)
   const authEmail = email && email.length ? email : `${id}@noemail.local`;
@@ -153,7 +155,7 @@ export async function registerUser(
   const userCred = await createUserWithEmailAndPassword(
     auth,
     authEmail,
-    password
+    password,
   );
   const user = userCred.user;
 
@@ -172,7 +174,7 @@ export async function registerUser(
         `Attempting Firestore user profile write (attempt ${attempt}, 8s timeout)`,
         {
           uid: user.uid,
-        }
+        },
       );
 
       // Firestore에 id, authEmail, (사용자 제공) email, uid 등을 저장합니다.
@@ -190,7 +192,7 @@ export async function registerUser(
       await Promise.race([
         write,
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("firestore-write-timeout")), 8000)
+          setTimeout(() => reject(new Error("firestore-write-timeout")), 8000),
         ),
       ]);
     };
@@ -298,7 +300,7 @@ export async function startChat(sellerId: string, productId: string) {
   const q = query(
     chatsRef,
     where("productId", "==", productId),
-    where("participants", "array-contains", user.uid)
+    where("participants", "array-contains", user.uid),
   );
 
   const snap = await getDocs(q);
@@ -364,7 +366,7 @@ export async function sendMessage(chatId: string, text: string) {
       updatedAt: Date.now(),
       unreadCounts: newUnreadCounts,
     },
-    { merge: true }
+    { merge: true },
   );
 }
 
@@ -381,14 +383,14 @@ export async function markChatAsRead(chatId: string) {
     {
       [`unreadCounts.${user.uid}`]: 0,
     },
-    { merge: true }
+    { merge: true },
   );
 }
 
 // 3. 메시지 목록 실시간 구독 (onSnapshot 사용)
 export function subscribeToMessages(
   chatId: string,
-  callback: (msgs: ChatMessage[]) => void
+  callback: (msgs: ChatMessage[]) => void,
 ) {
   const messagesRef = collection(db, "chats", chatId, "messages");
   // 시간순 정렬
@@ -420,3 +422,23 @@ export async function getMyChats() {
   // 최신 업데이트 순 정렬
   return chats.sort((a, b) => b.updatedAt - a.updatedAt);
 }
+
+/*
+  Firebase Web 시작 / 설정 ✅
+  https://firebase.google.com/docs/web/setup
+
+  모듈형 SDK(v9+) 가이드 (현재 파일과 동일한 패턴) 🔧
+  https://firebase.google.com/docs/web/modular-upgrade
+
+  인증(Auth) 🔐
+  https://firebase.google.com/docs/auth/web/start
+
+  Firestore(데이터베이스) ⚡
+  https://firebase.google.com/docs/firestore/quickstart
+
+    Storage(파일 업로드) 📁
+    https://firebase.google.com/docs/storage
+  
+  TypeScript / JS 레퍼런스 (API 시그니처 확인용) 🧭
+  https://firebase.google.com/docs/reference/js
+*/
