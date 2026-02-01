@@ -2,26 +2,12 @@ import { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { Draggable } from "gsap/all";
-import { auth, addProduct, uploadImage } from "../firebase";
+import { auth, addProduct, uploadImage } from "../sdk/firebase";
 import "../css/productRegister.css";
 
 gsap.registerPlugin(Draggable);
 
-const CATEGORIES = [
-  "디지털기기",
-  "생활가전",
-  "가구/인테리어",
-  "유아동",
-  "생활/가공식품",
-  "여성의류",
-  "남성의류",
-  "스포츠/레저",
-  "게임/취미",
-  "도서/티켓/음반",
-  "식물",
-  "반려동물용품",
-  "기타",
-];
+const CATEGORIES = ["디지털기기", "생활가전", "가구/인테리어", "유아동", "생활/가공식품", "여성의류", "남성의류", "스포츠/레저", "게임/취미", "도서/티켓/음반", "식물", "반려동물용품", "기타"];
 
 export default function ProductRegister() {
   const navigate = useNavigate();
@@ -72,11 +58,7 @@ export default function ProductRegister() {
           // Reset position logic styling
           gsap.set(this.target, { zIndex: 1, cursor: "grab", x: 0, y: 0 });
 
-          if (
-            draggedIndex !== -1 &&
-            targetIndex !== -1 &&
-            targetIndex !== draggedIndex
-          ) {
+          if (draggedIndex !== -1 && targetIndex !== -1 && targetIndex !== draggedIndex) {
             console.log(`Swapping ${draggedIndex} -> ${targetIndex}`);
             // Swap logic
             setImages((prev) => {
@@ -123,9 +105,7 @@ export default function ProductRegister() {
       setIsSubmitting(true);
 
       // 1. Upload Images
-      const uploadedImageUrls = await Promise.all(
-        images.map((img) => uploadImage(img))
-      );
+      const uploadedImageUrls = await Promise.all(images.map((img) => uploadImage(img)));
 
       // 2. Create Product in Firestore
       const priceNumber = Number(price.replace(/,/g, ""));
@@ -153,10 +133,7 @@ export default function ProductRegister() {
 
   if (isLoading) {
     return (
-      <div
-        className="product-register-container"
-        style={{ textAlign: "center", padding: "4rem 0" }}
-      >
+      <div className="product-register-container" style={{ textAlign: "center", padding: "4rem 0" }}>
         <p>Loading...</p>
       </div>
     );
@@ -186,26 +163,14 @@ export default function ProductRegister() {
         {/* Title Section */}
         <div className="form-group">
           <label className="form-label">제목</label>
-          <input
-            type="text"
-            className="form-input"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="제목을 입력해주세요."
-          />
+          <input type="text" className="form-input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="제목을 입력해주세요." />
         </div>
 
         {/* Image Upload Section */}
         <div className="form-group">
           <div className="image-upload-wrapper" ref={containerRef}>
             <label className="image-upload-btn">
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageUpload}
-                style={{ display: "none" }}
-              />
+              <input type="file" multiple accept="image/*" onChange={handleImageUpload} style={{ display: "none" }} />
               <span className="camera-icon">📷</span>
               <span className="image-count">
                 <span className="current-count">{images.length}</span>/10
@@ -223,9 +188,7 @@ export default function ProductRegister() {
                 style={{ cursor: "grab", touchAction: "none" }}
               >
                 <img src={URL.createObjectURL(file)} alt={`preview-${index}`} />
-                {index === 0 && (
-                  <div className="representative-badge">대표 사진</div>
-                )}
+                {index === 0 && <div className="representative-badge">대표 사진</div>}
                 <button
                   type="button"
                   className="delete-image-btn"
@@ -248,12 +211,7 @@ export default function ProductRegister() {
           <label className="form-label">카테고리</label>
           <div className="category-grid">
             {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                className={`category-item ${category === cat ? "active" : ""}`}
-                onClick={() => setCategory(cat)}
-              >
+              <button key={cat} type="button" className={`category-item ${category === cat ? "active" : ""}`} onClick={() => setCategory(cat)}>
                 {cat}
               </button>
             ))}
@@ -263,12 +221,7 @@ export default function ProductRegister() {
         {/* Description Section */}
         <div className="form-group">
           <label className="form-label">자세한 설명</label>
-          <textarea
-            className="form-textarea"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder=""
-          ></textarea>
+          <textarea className="form-textarea" value={description} onChange={(e) => setDescription(e.target.value)} placeholder=""></textarea>
         </div>
 
         {/* Price Section */}
@@ -291,12 +244,7 @@ export default function ProductRegister() {
 
         {/* Submit Button */}
         <div className="submit-btn-wrapper">
-          <button
-            type="button"
-            className="submit-btn"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-          >
+          <button type="button" className="submit-btn" onClick={handleSubmit} disabled={isSubmitting}>
             {isSubmitting ? "등록 중..." : "작성 완료"}
           </button>
         </div>

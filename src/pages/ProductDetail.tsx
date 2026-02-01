@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getProduct, getUserProfile, startChat, incrementView, type Product } from "../firebase";
+import { getProduct, getUserProfile, startChat, incrementView, type Product } from "../sdk/firebase";
 import { useAuthStore } from "../store/useAuthStore";
 import ChatModal from "../components/ChatModal";
 import "../css/productDetail.css";

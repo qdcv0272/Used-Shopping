@@ -2,7 +2,7 @@ import "./css/app.css";
 import { useEffect } from "react";
 import { NavLink, Routes, Route, useNavigate } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "./firebase";
+import { auth } from "./sdk/firebase";
 import { useAuthStore } from "./store/useAuthStore";
 import Home from "./pages/Home";
 import Login from "./pages/Login";

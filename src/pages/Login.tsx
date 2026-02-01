@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase";
+import { auth } from "../sdk/firebase";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { useForm } from "../hooks/useForm"; // 커스텀 훅 임포트
 
@@ -44,7 +44,7 @@ export default function Login({ onClose }: LoginProps) {
       }
 
       setMessage("로그인 중...");
-      const { loginUser } = await import("../firebase");
+      const { loginUser } = await import("../sdk/firebase");
       const cred = await loginUser(id, password);
 
       // Success

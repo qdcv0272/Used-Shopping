@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
-import { getProducts, searchProducts, type Product } from "../firebase";
+import { getProducts, searchProducts, type Product } from "../sdk/firebase";
 import { useProductFilterStore } from "../store/useProductFilterStore";
 import "../css/home.css";
 

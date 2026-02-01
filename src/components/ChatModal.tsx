@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { sendMessage, subscribeToMessages, type ChatMessage } from "../firebase";
+import { sendMessage, subscribeToMessages, type ChatMessage } from "../sdk/firebase";
 import { useAuthStore } from "../store/useAuthStore";
 import "../css/chatModal.css";
 

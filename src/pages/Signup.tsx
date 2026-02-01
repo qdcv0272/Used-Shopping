@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase";
+import { auth } from "../sdk/firebase";
 import { signOut } from "firebase/auth";
 import "../css/login.css";
 import "../css/signup.css";
@@ -21,12 +21,8 @@ export default function Signup() {
   const [isEmailChecked, setIsEmailChecked] = useState(false);
   const [isNicknameChecked, setIsNicknameChecked] = useState(false);
   const [idCheckMessage, setIdCheckMessage] = useState<string | null>(null);
-  const [emailCheckMessage, setEmailCheckMessage] = useState<string | null>(
-    null,
-  );
-  const [nicknameCheckMessage, setNicknameCheckMessage] = useState<
-    string | null
-  >(null);
+  const [emailCheckMessage, setEmailCheckMessage] = useState<string | null>(null);
+  const [nicknameCheckMessage, setNicknameCheckMessage] = useState<string | null>(null);
   const [nickname, setNickname] = useState("");
   const [nicknameError, setNicknameError] = useState<string | null>(null);
 
@@ -51,9 +47,7 @@ export default function Signup() {
       return false;
     }
     if (!/^[A-Za-z0-9]+$/.test(value)) {
-      setIdError(
-        "아이디는 영문/숫자만 가능합니다. 특수문자는 사용할 수 없습니다.",
-      );
+      setIdError("아이디는 영문/숫자만 가능합니다. 특수문자는 사용할 수 없습니다.");
       return false;
     }
     const letters = (value.match(/[A-Za-z]/g) || []).length;
@@ -105,9 +99,7 @@ export default function Signup() {
     const hasDigit = /\d/.test(value);
     const hasSpecial = /[^A-Za-z0-9]/.test(value);
     if (!(hasLower && hasUpper && hasDigit && hasSpecial)) {
-      setPasswordError(
-        "비밀번호는 대문자·소문자·숫자·특수문자를 모두 포함해야 합니다.",
-      );
+      setPasswordError("비밀번호는 대문자·소문자·숫자·특수문자를 모두 포함해야 합니다.");
       return false;
     }
     setPasswordError(null);
@@ -176,13 +168,7 @@ export default function Signup() {
       const validPassword = validatePassword();
       const validConfirm = validateConfirm();
 
-      if (
-        !validId ||
-        !validNickname ||
-        !validEmail ||
-        !validPassword ||
-        !validConfirm
-      ) {
+      if (!validId || !validNickname || !validEmail || !validPassword || !validConfirm) {
         setMessage("입력값을 확인하세요.");
         // 첫 번째 오류 필드로 포커스 이동
         if (!validId) {
@@ -235,35 +221,25 @@ export default function Signup() {
       };
       // `fail` helper removed — 실패는 catch에서 직접 처리합니다.
 
-      const { registerUser } = await import("../firebase");
-      const user = await registerUser(
+      const { registerUser } = await import("../sdk/firebase");
+      const user = await registerUser(id, password, email || undefined, nickname, {
+        displayName: nickname,
         id,
-        password,
-        email || undefined,
-        nickname,
-        {
-          displayName: nickname,
-          id,
-        },
-      );
+      });
       console.log("registerUser resolved", {
         uid: user?.uid,
         email: user?.email,
-        profileSaved: (user as { _profileSaved?: boolean } | null)
-          ?._profileSaved,
+        profileSaved: (user as { _profileSaved?: boolean } | null)?._profileSaved,
       });
 
       // post-registration 단계가 예기치 않게 실패하는지 확인하기 위해 안전하게 감싼다.
       try {
         // 표시용으로는 제공한 이메일을 우선 사용하고 없으면 id를 사용합니다.
-        const profileSaved =
-          (user as { _profileSaved?: boolean } | null)?._profileSaved !== false;
+        const profileSaved = (user as { _profileSaved?: boolean } | null)?._profileSaved !== false;
         console.log("Profile saved flag:", profileSaved);
 
         const shown = profileSaved ? (email && email.length ? email : id) : id;
-        const finalMessage = profileSaved
-          ? `회원가입 완료: ${shown}`
-          : `회원가입 완료: ${shown} (프로필 저장 실패)`;
+        const finalMessage = profileSaved ? `회원가입 완료: ${shown}` : `회원가입 완료: ${shown} (프로필 저장 실패)`;
 
         // 즉시 메시지 설정 후 성공 처리 — 컴포넌트가 언마운트 되지 않는 한 메시지가 보입니다.
         setMessage(finalMessage);
@@ -297,23 +273,15 @@ export default function Signup() {
       console.error("Signup error details", { code, raw, err });
 
       const mapped = (() => {
-        if (code === "auth/email-already-in-use" || /EMAIL_EXISTS/i.test(raw))
-          return "이미 사용 중인 이메일입니다.";
-        if (code === "auth/invalid-email" || /INVALID_EMAIL/i.test(raw))
-          return "유효하지 않은 이메일 형식입니다.";
-        if (code === "auth/too-many-requests" || /TOO_MANY_ATTEMPTS/i.test(raw))
-          return "시도 횟수가 많습니다. 잠시 후 다시 시도하세요.";
-        if (code === "auth/operation-not-allowed")
-          return "이메일/비밀번호 가입이 Firebase 콘솔에서 활성화되어 있지 않습니다.";
-        if (code === "auth/weak-password")
-          return "비밀번호가 약합니다. 더 긴 비밀번호를 사용하세요.";
-        if (code === "auth/invalid-api-key")
-          return "Firebase API 키가 유효하지 않습니다. 환경 변수(VITE_FIREBASE_*)를 확인하세요.";
+        if (code === "auth/email-already-in-use" || /EMAIL_EXISTS/i.test(raw)) return "이미 사용 중인 이메일입니다.";
+        if (code === "auth/invalid-email" || /INVALID_EMAIL/i.test(raw)) return "유효하지 않은 이메일 형식입니다.";
+        if (code === "auth/too-many-requests" || /TOO_MANY_ATTEMPTS/i.test(raw)) return "시도 횟수가 많습니다. 잠시 후 다시 시도하세요.";
+        if (code === "auth/operation-not-allowed") return "이메일/비밀번호 가입이 Firebase 콘솔에서 활성화되어 있지 않습니다.";
+        if (code === "auth/weak-password") return "비밀번호가 약합니다. 더 긴 비밀번호를 사용하세요.";
+        if (code === "auth/invalid-api-key") return "Firebase API 키가 유효하지 않습니다. 환경 변수(VITE_FIREBASE_*)를 확인하세요.";
 
         // 기본: 코드가 있으면 코드를 접두사로, 아니면 원문 메시지를 사용
-        return `${code ? `[${code}] ` : ""}${
-          raw || "회원가입 중 오류가 발생했습니다."
-        }`;
+        return `${code ? `[${code}] ` : ""}${raw || "회원가입 중 오류가 발생했습니다."}`;
       })();
 
       setMessage(mapped);
@@ -323,13 +291,9 @@ export default function Signup() {
       setIsSubmitting(false);
       // 최종 안전장치: 예기치 않게 finished가 false인 채로 남지 않도록 함
       if (!finished) {
-        console.log(
-          "Signup flow finished without succeed/fail flag; ensuring message is visible",
-        );
+        console.log("Signup flow finished without succeed/fail flag; ensuring message is visible");
         finished = true;
-        setMessage(
-          (prev) => prev || "회원가입 처리가 완료되었는지 확인해 주세요.",
-        );
+        setMessage((prev) => prev || "회원가입 처리가 완료되었는지 확인해 주세요.");
       }
     }
   };
@@ -432,12 +396,7 @@ export default function Signup() {
         />
 
         <div className="actions">
-          <button
-            className="btn"
-            type="button"
-            onClick={handleSignup}
-            disabled={isSubmitting}
-          >
+          <button className="btn" type="button" onClick={handleSignup} disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <span className="spinner"></span> 가입 중...
@@ -458,15 +417,7 @@ export default function Signup() {
           </button>
         </div>
 
-        {message && (
-          <p
-            className={`login-message ${
-              /완료|가입 완료|회원가입 완료/.test(message) ? "success" : "error"
-            }`}
-          >
-            {message}
-          </p>
-        )}
+        {message && <p className={`login-message ${/완료|가입 완료|회원가입 완료/.test(message) ? "success" : "error"}`}>{message}</p>}
       </div>
     </div>
   );

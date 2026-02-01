@@ -1,15 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  auth,
-  getUserProfile,
-  getProductsBySeller,
-  getMyChats,
-  getProduct,
-  markChatAsRead,
-  type Product,
-  type ChatRoom,
-} from "../firebase";
+import { auth, getUserProfile, getProductsBySeller, getMyChats, getProduct, markChatAsRead, type Product, type ChatRoom } from "../sdk/firebase";
 import ChatModal from "../components/ChatModal";
 import "../css/myPage.css";
 
@@ -110,29 +101,19 @@ export default function MyPage() {
       <div className="profile-card">
         <div className="profile-item">
           <span className="label">닉네임</span>
-          <span className="value">
-            {userProfile?.nickname || "설정되지 않음"}
-          </span>
+          <span className="value">{userProfile?.nickname || "설정되지 않음"}</span>
         </div>
         <div className="profile-item">
           <span className="label">아이디</span>
-          <span className="value">
-            {userProfile?.id || auth.currentUser.email?.split("@")[0]}
-          </span>
+          <span className="value">{userProfile?.id || auth.currentUser.email?.split("@")[0]}</span>
         </div>
         <div className="profile-item">
           <span className="label">이메일</span>
-          <span className="value">
-            {userProfile?.email || auth.currentUser.email || "-"}
-          </span>
+          <span className="value">{userProfile?.email || auth.currentUser.email || "-"}</span>
         </div>
         <div className="profile-item">
           <span className="label">가입일</span>
-          <span className="value">
-            {userProfile?.createdAt
-              ? new Date(userProfile.createdAt).toLocaleDateString()
-              : "-"}
-          </span>
+          <span className="value">{userProfile?.createdAt ? new Date(userProfile.createdAt).toLocaleDateString() : "-"}</span>
         </div>
       </div>
 
@@ -143,18 +124,11 @@ export default function MyPage() {
         ) : (
           <div className="chat-list">
             {chats.map((chat) => (
-              <div
-                key={chat.id}
-                className="chat-item"
-                onClick={() => openChat(chat.id, chatPartners[chat.id])}
-              >
+              <div key={chat.id} className="chat-item" onClick={() => openChat(chat.id, chatPartners[chat.id])}>
                 <div className="chat-avatar">
                   💬
                   {/* 안 읽은 메시지 배지 */}
-                  {chat.unreadCounts &&
-                    chat.unreadCounts[auth.currentUser?.uid || ""] > 0 && (
-                      <span className="unread-badge">N</span>
-                    )}
+                  {chat.unreadCounts && chat.unreadCounts[auth.currentUser?.uid || ""] > 0 && <span className="unread-badge">N</span>}
                 </div>
                 <div className="chat-info">
                   <div className="chat-partner">
@@ -166,9 +140,7 @@ export default function MyPage() {
                     {chatProducts[chat.id] || "상품 정보 없음"}
                   </div>
                 </div>
-                <div className="chat-meta">
-                  {new Date(chat.updatedAt).toLocaleDateString()}
-                </div>
+                <div className="chat-meta">{new Date(chat.updatedAt).toLocaleDateString()}</div>
               </div>
             ))}
           </div>
@@ -182,26 +154,12 @@ export default function MyPage() {
         ) : (
           <div className="my-product-list">
             {myProducts.map((product) => (
-              <div
-                key={product.id}
-                className="my-product-item"
-                onClick={() => navigate(`/products/${product.id}`)}
-              >
-                <div className="my-product-image">
-                  {product.images && product.images.length > 0 ? (
-                    <img src={product.images[0]} alt={product.title} />
-                  ) : (
-                    <div className="no-image">📦</div>
-                  )}
-                </div>
+              <div key={product.id} className="my-product-item" onClick={() => navigate(`/products/${product.id}`)}>
+                <div className="my-product-image">{product.images && product.images.length > 0 ? <img src={product.images[0]} alt={product.title} /> : <div className="no-image">📦</div>}</div>
                 <div className="my-product-info">
                   <div className="my-product-title">{product.title}</div>
-                  <div className="my-product-price">
-                    {product.price.toLocaleString()}원
-                  </div>
-                  <div className="my-product-date">
-                    {new Date(product.createdAt).toLocaleDateString()}
-                  </div>
+                  <div className="my-product-price">{product.price.toLocaleString()}원</div>
+                  <div className="my-product-date">{new Date(product.createdAt).toLocaleDateString()}</div>
                 </div>
               </div>
             ))}
@@ -210,14 +168,7 @@ export default function MyPage() {
       </div>
 
       {/* Chat Modal */}
-      {isChatOpen && (
-        <ChatModal
-          isOpen={isChatOpen}
-          onClose={() => setIsChatOpen(false)}
-          chatId={currentChatId}
-          sellerName={currentChatName}
-        />
-      )}
+      {isChatOpen && <ChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} chatId={currentChatId} sellerName={currentChatName} />}
     </div>
   );
 }
