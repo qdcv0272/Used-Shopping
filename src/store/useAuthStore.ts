@@ -3,7 +3,7 @@ import { type User } from "firebase/auth";
 
 interface AuthState {
   user: User | null;
-  startAuthListener: boolean; // 리스너 등록 여부 확인용
+  startAuthListener: boolean;
   setUser: (user: User | null) => void;
 }
 

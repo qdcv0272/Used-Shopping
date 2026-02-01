@@ -32,7 +32,7 @@
 
 .app-header h1 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 24px;
 }
 
 .app-header nav a {
@@ -44,4 +44,19 @@
 .app-header nav a.active {
   font-weight: 700;
   border-bottom: 2px solid currentColor;
+}
+
+.nav-logo-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav-logout-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+  text-decoration: underline;
 }

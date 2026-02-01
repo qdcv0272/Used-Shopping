@@ -11,7 +11,6 @@ import MyPage from "./pages/MyPage";
 import NotFound from "./pages/NotFound";
 import ProductDetail from "./pages/ProductDetail";
 import ProductRegister from "./pages/ProductRegister";
-// 각 페이지 컴포넌트들을 임포트
 
 function App() {
   const { user, setUser } = useAuthStore();
@@ -38,7 +37,7 @@ function App() {
     <div className="App">
       <header className="app-header">
         <h1>
-          <NavLink to="/" style={{ textDecoration: "none", color: "inherit" }}>
+          <NavLink to="/" className="nav-logo-link">
             사과 중고 마켓
           </NavLink>
         </h1>
@@ -58,19 +57,7 @@ function App() {
           {user ? (
             <>
               {" | "}
-              <button
-                onClick={handleLogout}
-                className="nav-btn"
-                style={{
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  font: "inherit",
-                  cursor: "pointer",
-                  color: "inherit",
-                  textDecoration: "underline",
-                }}
-              >
+              <button onClick={handleLogout} className="nav-btn nav-logout-btn">
                 로그아웃
               </button>
             </>

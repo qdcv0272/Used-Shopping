@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, getUserProfile, getProductsBySeller, getMyChats, getProduct, markChatAsRead, type Product, type ChatRoom } from "../sdk/firebase";
+import { auth, getUserProfile, getProductsBySeller, getMyChats, getProduct, markChatAsRead, type Product, type ChatRoom, type UserProfile } from "../sdk/firebase";
 import ChatModal from "../components/ChatModal";
 import "../css/myPage.css";
 
 export default function MyPage() {
   const navigate = useNavigate();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [userProfile, setUserProfile] = useState<any>(null);
+
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [myProducts, setMyProducts] = useState<Product[]>([]);
 
-  // Chat State
   const [chats, setChats] = useState<ChatRoom[]>([]);
   const [chatPartners, setChatPartners] = useState<Record<string, string>>({});
   const [chatProducts, setChatProducts] = useState<Record<string, string>>({});
@@ -29,11 +28,9 @@ export default function MyPage() {
           const products = await getProductsBySeller(user.uid);
           setMyProducts(products);
 
-          // 채팅 목록 가져오기
           const myChats = await getMyChats();
           setChats(myChats);
 
-          // 채팅 상대방 닉네임 & 상품명 가져오기
           const partners: Record<string, string> = {};
           const productNames: Record<string, string> = {};
 
@@ -41,10 +38,10 @@ export default function MyPage() {
             const otherId = chat.participants.find((uid) => uid !== user.uid);
             if (otherId) {
               const p = await getUserProfile(otherId);
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              partners[chat.id] = (p as any)?.nickname || "알 수 없는 사용자";
+
+              partners[chat.id] = p?.nickname || "알 수 없는 사용자";
             }
-            // 상품 정보 가져오기
+
             if (chat.productId) {
               const prod = await getProduct(chat.productId);
               if (prod) {
@@ -72,9 +69,9 @@ export default function MyPage() {
     setCurrentChatId(chatId);
     setCurrentChatName(partnerName);
     setIsChatOpen(true);
-    // 채팅방 열 때 읽음 처리
+
     await markChatAsRead(chatId);
-    // 목록 새로고침 (간단하게 구현)
+
     const myChats = await getMyChats();
     setChats(myChats);
   };
@@ -85,8 +82,8 @@ export default function MyPage() {
     return (
       <div className="mypage-container">
         <h2>내 정보</h2>
-        <div style={{ textAlign: "center", padding: "2rem 0" }}>
-          <p style={{ marginBottom: "1rem" }}>로그인이 필요한 서비스입니다.</p>
+        <div className="auth-required-content">
+          <p className="auth-required-text">로그인이 필요한 서비스입니다.</p>
           <button className="mypage-btn" onClick={() => navigate("/login")}>
             로그인 하러 가기
           </button>
@@ -127,7 +124,6 @@ export default function MyPage() {
               <div key={chat.id} className="chat-item" onClick={() => openChat(chat.id, chatPartners[chat.id])}>
                 <div className="chat-avatar">
                   💬
-                  {/* 안 읽은 메시지 배지 */}
                   {chat.unreadCounts && chat.unreadCounts[auth.currentUser?.uid || ""] > 0 && <span className="unread-badge">N</span>}
                 </div>
                 <div className="chat-info">
@@ -167,7 +163,6 @@ export default function MyPage() {
         )}
       </div>
 
-      {/* Chat Modal */}
       {isChatOpen && <ChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} chatId={currentChatId} sellerName={currentChatName} />}
     </div>
   );

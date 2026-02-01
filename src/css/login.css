@@ -1,9 +1,8 @@
-/* Login Page Styles */
 .login-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 80vh;
+  min-height: 80%;
   background-color: #f8f9fa;
   padding: 20px;
 }
@@ -12,7 +11,7 @@
   background-color: #ffffff;
   padding: 40px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Soft shadow */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   width: 100%;
   max-width: 400px;
   text-align: center;
@@ -34,7 +33,6 @@
   margin-top: 0;
 }
 
-/* Form Styles */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -60,7 +58,9 @@
   font-size: 15px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   box-sizing: border-box;
   background-color: #fafafa;
 }
@@ -72,7 +72,6 @@
   background-color: #fff;
 }
 
-/* Buttons */
 .login-btn {
   width: 100%;
   padding: 12px;
@@ -81,7 +80,9 @@
   border-radius: 8px;
   cursor: pointer;
   border: none;
-  transition: background-color 0.2s, opacity 0.2s;
+  transition:
+    background-color 0.2s,
+    opacity 0.2s;
 }
 
 .login-btn.primary {
@@ -112,7 +113,6 @@
   background-color: #d32f2f;
 }
 
-/* Footer & Links */
 .login-footer {
   font-size: 14px;
   color: #666;
@@ -129,7 +129,6 @@
   text-decoration: underline;
 }
 
-/* Messages */
 .login-message-box {
   margin-top: 20px;
   padding: 12px;
@@ -156,7 +155,6 @@
   gap: 10px;
 }
 
-/* Logged in view */
 .logged-in-info {
   margin-bottom: 24px;
   padding: 20px 0;
@@ -169,12 +167,11 @@
   color: #333;
 }
 
-/* Compatibility for Signup Page (Legacy classes adaptation) */
 .login.signup {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 80vh;
+  min-height: 80%;
   background-color: #f8f9fa;
   padding: 20px;
   margin: 0;
@@ -186,7 +183,7 @@
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   width: 100%;
-  max-width: 500px; /* Slightly wider for signup */
+  max-width: 500px;
   text-align: center;
   box-sizing: border-box;
 }
@@ -206,7 +203,6 @@
   margin-top: 0;
 }
 
-/* Generic Field/Input styles used by Signup */
 .field {
   text-align: left;
   margin-bottom: 16px;
@@ -228,7 +224,9 @@
   font-size: 15px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   box-sizing: border-box;
   background-color: #fafafa;
 }
@@ -260,7 +258,9 @@
   border-radius: 8px;
   cursor: pointer;
   border: none;
-  transition: background-color 0.2s, opacity 0.2s;
+  transition:
+    background-color 0.2s,
+    opacity 0.2s;
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -286,15 +286,13 @@
   color: #333;
 }
 
-/* Fix for Signup page fields with side buttons */
 .field.role-field .btn {
-  width: auto; /* Prevent button from taking full width in a flex row */
-  flex-shrink: 0; /* Keep button existing */
+  width: auto;
+  flex-shrink: 0;
   margin: 0;
 }
 
 .field.role-field .input {
-  /* Input already has flex: 1 inline, but we ensure width doesn't fight */
   width: auto;
 }
 

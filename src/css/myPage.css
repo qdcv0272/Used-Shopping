@@ -1,7 +1,7 @@
 .mypage-container {
   max-width: 600px;
-  margin: 3rem auto;
-  padding: 2.5rem;
+  margin: 48px auto;
+  padding: 40px;
   background-color: #ffffff;
   border-radius: 16px;
   color: #333;
@@ -11,8 +11,8 @@
 
 .mypage-container h2 {
   text-align: center;
-  margin-bottom: 2rem;
-  font-size: 1.8rem;
+  margin-bottom: 32px;
+  font-size: 29px;
   color: #222;
   font-weight: 700;
 }
@@ -20,9 +20,9 @@
 .profile-card {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 24px;
   background-color: #f8f9fa;
-  padding: 2rem;
+  padding: 32px;
   border-radius: 12px;
   border: 1px solid #edf2f7;
 }
@@ -31,7 +31,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 1rem;
+  padding-bottom: 16px;
   border-bottom: 1px solid #e1e4e8;
 }
 
@@ -43,24 +43,24 @@
 .profile-item .label {
   font-weight: 600;
   color: #666;
-  font-size: 0.95rem;
+  font-size: 15px;
 }
 
 .profile-item .value {
-  font-size: 1.1rem;
+  font-size: 18px;
   color: #333;
   font-weight: 500;
 }
 
 .mypage-container .mypage-btn {
   width: 100%;
-  padding: 1rem;
-  margin-top: 1.5rem;
+  padding: 16px;
+  margin-top: 24px;
   background-color: #4a90e2;
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -80,26 +80,26 @@
 .loading {
   text-align: center;
   color: #666;
-  padding: 2rem;
-  font-size: 1.1rem;
+  padding: 32px;
+  font-size: 18px;
 }
 
 .my-products-section {
-  margin-top: 3rem;
+  margin-top: 48px;
   border-top: 1px solid #f0f0f0;
-  padding-top: 2rem;
+  padding-top: 32px;
 }
 
 .my-products-section h3 {
-  margin-bottom: 1.5rem;
-  font-size: 1.4rem;
+  margin-bottom: 24px;
+  font-size: 22px;
   color: #333;
 }
 
 .no-products {
   text-align: center;
   color: #888;
-  padding: 2rem 0;
+  padding: 32px 0;
   background-color: #f9f9f9;
   border-radius: 8px;
 }
@@ -107,19 +107,21 @@
 .my-product-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 16px;
 }
 
 .my-product-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
+  gap: 16px;
+  padding: 16px;
   background-color: #fff;
   border: 1px solid #eee;
   border-radius: 8px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .my-product-item:hover {
@@ -147,7 +149,7 @@
 }
 
 .my-product-image .no-image {
-  font-size: 2rem;
+  font-size: 32px;
 }
 
 .my-product-info {
@@ -156,39 +158,38 @@
 
 .my-product-title {
   font-weight: 600;
-  font-size: 1.1rem;
-  margin-bottom: 0.3rem;
+  font-size: 18px;
+  margin-bottom: 5px;
   color: #333;
 }
 
 .my-product-price {
   font-weight: 700;
   color: #4a90e2;
-  margin-bottom: 0.3rem;
+  margin-bottom: 5px;
 }
 
 .my-product-date {
-  font-size: 0.85rem;
+  font-size: 14px;
   color: #999;
 }
 
-/* Chat List Section */
 .my-chats-section {
-  margin-top: 3rem;
+  margin-top: 48px;
   border-top: 1px solid #f0f0f0;
-  padding-top: 2rem;
+  padding-top: 32px;
 }
 
 .my-chats-section h3 {
-  margin-bottom: 1.5rem;
-  font-size: 1.4rem;
+  margin-bottom: 24px;
+  font-size: 22px;
   color: #333;
 }
 
 .no-chats {
   text-align: center;
   color: #888;
-  padding: 2rem 0;
+  padding: 32px 0;
   background-color: #f9f9f9;
   border-radius: 8px;
 }
@@ -196,14 +197,14 @@
 .chat-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 16px;
 }
 
 .chat-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.2rem;
+  gap: 16px;
+  padding: 19px;
   background-color: #fff;
   border: 1px solid #eee;
   border-radius: 12px;
@@ -225,38 +226,38 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 24px;
   flex-shrink: 0;
 }
 
 .chat-info {
   flex: 1;
-  min-width: 0; /* Text truncation fix */
+  min-width: 0;
 }
 
 .chat-partner {
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: 17px;
   margin-bottom: 4px;
   color: #333;
 }
 
 .chat-last-message {
   color: #666;
-  font-size: 0.95rem;
+  font-size: 15px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .chat-meta {
-  font-size: 0.8rem;
+  font-size: 13px;
   color: #999;
   white-space: nowrap;
 }
 
 .chat-product-name {
-  font-size: 0.85rem;
+  font-size: 14px;
   color: #888;
   font-weight: 400;
   margin-left: 8px;
@@ -264,13 +265,13 @@
 
 .chat-partner {
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: 17px;
   margin-bottom: 4px;
   color: #333;
 }
 
 .chat-product-row {
-  font-size: 0.95rem;
+  font-size: 15px;
   color: #555;
   margin-bottom: 2px;
 }
@@ -278,12 +279,12 @@
 .label-text {
   font-weight: 500;
   color: #888;
-  font-size: 0.9rem;
+  font-size: 14px;
   margin-right: 4px;
 }
 
 .chat-avatar {
-  position: relative; /* For badge positioning */
+  position: relative;
 }
 
 .unread-badge {
@@ -295,10 +296,19 @@
   border-radius: 50%;
   width: 18px;
   height: 18px;
-  font-size: 0.7rem;
+  font-size: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
   border: 1px solid white;
+}
+
+.auth-required-content {
+  text-align: center;
+  padding: 32px 0;
+}
+
+.auth-required-text {
+  margin-bottom: 16px;
 }

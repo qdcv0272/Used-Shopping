@@ -1,10 +1,8 @@
-/* Product Detail Container */
 .product-detail-container {
   max-width: 1000px;
   margin: 40px auto;
   padding: 0 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .detail-layout {
@@ -14,7 +12,6 @@
   align-items: start;
 }
 
-/* Left Column */
 .left-column {
   display: flex;
   flex-direction: column;
@@ -24,12 +21,12 @@
 .detail-image-wrapper {
   width: 100%;
   aspect-ratio: 1 / 1;
-  background-color: #8ecae6; /* Sample blue color from image */
+  background-color: #8ecae6;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 32px;
   color: white;
   overflow: hidden;
 }
@@ -41,7 +38,7 @@
 }
 
 .user-profile-section {
-  background-color: #8ecae6; /* Sample blue color */
+  background-color: #8ecae6;
   padding: 20px;
   border-radius: 12px;
   display: flex;
@@ -62,11 +59,10 @@
 }
 
 .user-name {
-  font-size: 1.1rem;
+  font-size: 18px;
   font-weight: 600;
 }
 
-/* Right Column */
 .right-column {
   display: flex;
   flex-direction: column;
@@ -76,7 +72,7 @@
 }
 
 .detail-product-title {
-  font-size: 1.8rem;
+  font-size: 29px;
   font-weight: 700;
   margin: 0 0 16px 0;
   color: #111;
@@ -93,22 +89,22 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 1.1rem;
+  font-size: 18px;
 }
 
 .detail-category {
   color: #666;
-  text-decoration: none; /* No underline */
+  text-decoration: none;
 }
 
 .detail-price {
-  font-size: 1.5rem;
+  font-size: 24px;
   font-weight: 700;
   color: #111;
 }
 
 .detail-description {
-  font-size: 1rem;
+  font-size: 16px;
   line-height: 1.6;
   color: #333;
   min-height: 150px;
@@ -119,10 +115,9 @@
   display: flex;
   gap: 16px;
   color: #888;
-  font-size: 0.9rem;
+  font-size: 14px;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .detail-layout {
     grid-template-columns: 1fr;
@@ -145,18 +140,20 @@
   flex: 1;
   padding: 16px;
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 18px;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: opacity 0.2s, transform 0.1s;
+  transition:
+    opacity 0.2s,
+    transform 0.1s;
 }
 
 .chat-btn {
-  background-color: #5bc0eb; /* Primary action color */
+  background-color: #5bc0eb;
   border: none;
   color: #fff;
 }
@@ -176,6 +173,14 @@
 }
 
 .product-detail-container {
-  /* Ensure container background is white based on design */
   background-color: #fff;
+}
+
+.detail-loading {
+  color: white;
+  padding: 32px;
+}
+
+.detail-separator {
+  color: #ddd;
 }

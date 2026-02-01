@@ -45,22 +45,18 @@ export default function ProductRegister() {
           const draggedIndex = parseInt(this.target.dataset.index || "-1");
 
           let targetIndex = -1;
-          // Find the drop target BEFORE resetting position
-          // hitTest returns true if the dragged element overlaps with the test element (ref)
+
           imageRefs.current.forEach((ref, index) => {
-            // Self check is always true, so we skip it to find the other element we are hovering over
-            // Use a lower threshold like 20% or 'touch' to make it easier to swap if needed, but 50% is standard overlap
             if (index !== draggedIndex && ref && this.hitTest(ref, "50%")) {
               targetIndex = index;
             }
           });
 
-          // Reset position logic styling
           gsap.set(this.target, { zIndex: 1, cursor: "grab", x: 0, y: 0 });
 
           if (draggedIndex !== -1 && targetIndex !== -1 && targetIndex !== draggedIndex) {
             console.log(`Swapping ${draggedIndex} -> ${targetIndex}`);
-            // Swap logic
+
             setImages((prev) => {
               const newImages = [...prev];
               const [moved] = newImages.splice(draggedIndex, 1);
@@ -72,7 +68,7 @@ export default function ProductRegister() {
       });
     }, containerRef);
     return () => ctx.revert();
-  }, [images]);
+  }, [images, isLoading, user]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -104,10 +100,8 @@ export default function ProductRegister() {
     try {
       setIsSubmitting(true);
 
-      // 1. Upload Images
       const uploadedImageUrls = await Promise.all(images.map((img) => uploadImage(img)));
 
-      // 2. Create Product in Firestore
       const priceNumber = Number(price.replace(/,/g, ""));
       await addProduct({
         title,
@@ -122,7 +116,7 @@ export default function ProductRegister() {
       });
 
       alert("상품이 등록되었습니다.");
-      navigate("/"); // Go to Home
+      navigate("/");
     } catch (error) {
       console.error("Error registering product:", error);
       alert("상품 등록 중 오류가 발생했습니다.");
@@ -133,7 +127,7 @@ export default function ProductRegister() {
 
   if (isLoading) {
     return (
-      <div className="product-register-container" style={{ textAlign: "center", padding: "4rem 0" }}>
+      <div className="product-register-container register-loading">
         <p>Loading...</p>
       </div>
     );
@@ -160,17 +154,15 @@ export default function ProductRegister() {
       </div>
 
       <form className="register-form" onSubmit={(e) => e.preventDefault()}>
-        {/* Title Section */}
         <div className="form-group">
           <label className="form-label">제목</label>
           <input type="text" className="form-input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="제목을 입력해주세요." />
         </div>
 
-        {/* Image Upload Section */}
         <div className="form-group">
           <div className="image-upload-wrapper" ref={containerRef}>
             <label className="image-upload-btn">
-              <input type="file" multiple accept="image/*" onChange={handleImageUpload} style={{ display: "none" }} />
+              <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="file-input-hidden" />
               <span className="camera-icon">📷</span>
               <span className="image-count">
                 <span className="current-count">{images.length}</span>/10
@@ -180,12 +172,11 @@ export default function ProductRegister() {
             {images.map((file, index) => (
               <div
                 key={`${file.name}-${file.lastModified}-${index}`}
-                className="image-preview"
+                className="image-preview image-preview-item"
                 ref={(el) => {
                   imageRefs.current[index] = el;
                 }}
                 data-index={index}
-                style={{ cursor: "grab", touchAction: "none" }}
               >
                 <img src={URL.createObjectURL(file)} alt={`preview-${index}`} />
                 {index === 0 && <div className="representative-badge">대표 사진</div>}
@@ -193,10 +184,10 @@ export default function ProductRegister() {
                   type="button"
                   className="delete-image-btn"
                   onClick={(e) => {
-                    e.stopPropagation(); // prevent drag start
+                    e.stopPropagation();
                     removeImage(index);
                   }}
-                  onMouseDown={(e) => e.stopPropagation()} // prevent drag start
+                  onMouseDown={(e) => e.stopPropagation()}
                   onTouchStart={(e) => e.stopPropagation()}
                 >
                   ❌
@@ -206,7 +197,6 @@ export default function ProductRegister() {
           </div>
         </div>
 
-        {/* Category Section */}
         <div className="form-group">
           <label className="form-label">카테고리</label>
           <div className="category-grid">
@@ -218,13 +208,11 @@ export default function ProductRegister() {
           </div>
         </div>
 
-        {/* Description Section */}
         <div className="form-group">
           <label className="form-label">자세한 설명</label>
           <textarea className="form-textarea" value={description} onChange={(e) => setDescription(e.target.value)} placeholder=""></textarea>
         </div>
 
-        {/* Price Section */}
         <div className="form-group">
           <label className="form-label">가격</label>
           <div className="price-group-header">
@@ -232,17 +220,10 @@ export default function ProductRegister() {
           </div>
           <div className="price-input-wrapper">
             <span className="currency-symbol">₩</span>
-            <input
-              type="text" // Using text to allow formatiing if needed, or number
-              className="form-input"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="가격을 입력해주세요."
-            />
+            <input type="text" className="form-input" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="가격을 입력해주세요." />
           </div>
         </div>
 
-        {/* Submit Button */}
         <div className="submit-btn-wrapper">
           <button type="button" className="submit-btn" onClick={handleSubmit} disabled={isSubmitting}>
             {isSubmitting ? "등록 중..." : "작성 완료"}

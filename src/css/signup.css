@@ -15,7 +15,7 @@
 }
 
 .duplicate-check-btn {
-  font-size: 0.8rem;
+  font-size: 13px;
   padding: 6px 8px;
   white-space: nowrap;
   background-color: transparent;
@@ -33,6 +33,6 @@
 
 .success-text {
   color: green;
-  font-size: 0.85rem;
+  font-size: 14px;
   margin-top: 4px;
 }

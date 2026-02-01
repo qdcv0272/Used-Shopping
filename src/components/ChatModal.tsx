@@ -52,7 +52,6 @@ export default function ChatModal({ isOpen, onClose, chatId, sellerName }: ChatM
   return (
     <div className="chat-modal-overlay" onClick={onClose}>
       <div className="chat-modal-container" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
         <div className="chat-header">
           <h3>{sellerName}님과의 대화</h3>
           <button className="close-btn" onClick={onClose}>
@@ -60,7 +59,6 @@ export default function ChatModal({ isOpen, onClose, chatId, sellerName }: ChatM
           </button>
         </div>
 
-        {/* Messages */}
         <div className="chat-messages">
           {messages.map((msg) => {
             const isMyMessage = msg.senderId === user?.uid;
@@ -79,7 +77,6 @@ export default function ChatModal({ isOpen, onClose, chatId, sellerName }: ChatM
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
         <form className="chat-input-area" onSubmit={handleSend}>
           <input type="text" placeholder="메시지를 입력하세요..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
           <button type="submit" disabled={!newMessage.trim()}>

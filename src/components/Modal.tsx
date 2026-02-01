@@ -22,17 +22,9 @@ export default function Modal({ onClose, children, title }: ModalProps) {
 
   return (
     <div className="modal-overlay" role="dialog" aria-modal="true">
-      <div
-        className="modal-backdrop"
-        onClick={() => onClose()}
-        aria-hidden="true"
-      />
+      <div className="modal-backdrop" onClick={() => onClose()} aria-hidden="true" />
 
-      <div
-        className="modal-panel"
-        role="document"
-        aria-labelledby="modal-title"
-      >
+      <div className="modal-panel" role="document" aria-labelledby="modal-title">
         {title && (
           <h2 id="modal-title" className="modal-title">
             {title}

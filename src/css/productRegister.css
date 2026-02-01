@@ -1,6 +1,6 @@
 .product-register-container {
   background-color: #ffffff;
-  min-height: calc(100vh - 100px);
+  min-height: calc(100% - 100px);
   color: #333333;
   padding: 20px;
   display: flex;
@@ -15,7 +15,7 @@
 }
 
 .product-register-header h2 {
-  font-size: 1.5rem;
+  font-size: 24px;
   font-weight: 700;
   margin: 0;
   color: #000;
@@ -35,7 +35,7 @@
 }
 
 .form-label {
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: 600;
   color: #000;
 }
@@ -47,14 +47,14 @@
   border-radius: 8px;
   padding: 14px;
   color: #333;
-  font-size: 1rem;
+  font-size: 16px;
   outline: none;
   transition: border-color 0.2s;
 }
 
 .form-input:focus,
 .form-textarea:focus {
-  border-color: #ff6f0f; /* Use primary accent color on focus */
+  border-color: #ff6f0f;
 }
 
 .form-textarea {
@@ -69,7 +69,7 @@
   border-radius: 6px;
   color: #666;
   padding: 8px 12px;
-  font-size: 0.8rem;
+  font-size: 13px;
   cursor: pointer;
   margin-top: -16px;
   transition: background-color 0.2s;
@@ -91,7 +91,7 @@
   color: #333;
   border-radius: 20px;
   padding: 4px 12px;
-  font-size: 0.8rem;
+  font-size: 13px;
   font-weight: 600;
   display: inline-block;
 }
@@ -110,7 +110,7 @@
 
 .price-input-wrapper input {
   width: 100%;
-  padding-left: 30px; /* Space for symbol */
+  padding-left: 30px;
 }
 
 .submit-btn-wrapper {
@@ -126,7 +126,7 @@
   border: none;
   border-radius: 8px;
   padding: 16px;
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -141,12 +141,11 @@
   color: #aaa;
 }
 
-/* Image Upload Styles */
 .image-upload-wrapper {
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  padding-bottom: 8px; /* For scrollbar space */
+  padding-bottom: 8px;
   align-items: center;
 }
 
@@ -165,17 +164,17 @@
 }
 
 .camera-icon {
-  font-size: 1.8rem;
+  font-size: 29px;
   margin-bottom: 4px;
 }
 
 .image-count {
-  font-size: 0.8rem;
+  font-size: 13px;
   color: #888;
 }
 
 .current-count {
-  color: #ff6f0f; /* Accent color */
+  color: #ff6f0f;
   font-weight: bold;
 }
 
@@ -208,7 +207,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
+  font-size: 11px;
   cursor: pointer;
   padding: 0;
   line-height: 1;
@@ -222,14 +221,13 @@
   width: 100%;
   background-color: rgba(0, 0, 0, 0.7);
   color: white;
-  font-size: 0.7rem;
+  font-size: 11px;
   text-align: center;
   padding: 4px 0;
   font-weight: bold;
-  pointer-events: none; /* Let clicks pass through */
+  pointer-events: none;
 }
 
-/* Category Styles */
 .category-list {
   display: flex;
   gap: 8px;
@@ -243,7 +241,7 @@
   background-color: #fff;
   padding: 8px 16px;
   border-radius: 20px;
-  font-size: 0.9rem;
+  font-size: 14px;
   color: #666;
   cursor: pointer;
   transition: all 0.2s;
@@ -254,22 +252,21 @@
 }
 
 .category-item.active {
-  background-color: #333; /* Selected state: Dark background similar to image badge */
+  background-color: #333;
   color: #fff;
   border-color: #333;
   font-weight: 600;
 }
 
-/* Category Grid Styles */
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Default for mobile/narrow screens */
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
 @media (min-width: 480px) {
   .category-grid {
-    grid-template-columns: repeat(4, 1fr); /* 4 columns on wider screens */
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
@@ -280,19 +277,18 @@
   text-align: center;
   height: 40px;
   padding: 0 8px;
-  /* Reset previous styles if any conflict */
-  border-radius: 8px; /* Slightly squarer for grid */
-  font-size: 0.85rem;
+
+  border-radius: 8px;
+  font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Auth Required State - Mimicking MyPage styles */
 .product-register-container.auth-required {
   max-width: 600px;
-  margin: 3rem auto;
-  padding: 2.5rem;
+  margin: 48px auto;
+  padding: 40px;
   border-radius: 16px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   border: 1px solid #f0f0f0;
@@ -302,31 +298,31 @@
 
 .product-register-container.auth-required h2 {
   text-align: center;
-  margin-bottom: 2rem;
-  font-size: 1.8rem;
+  margin-bottom: 32px;
+  font-size: 29px;
   color: #222;
   font-weight: 700;
 }
 
 .auth-message-wrapper {
   text-align: center;
-  padding: 2rem 0;
+  padding: 32px 0;
 }
 
 .auth-message-wrapper p {
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
+  margin-bottom: 16px;
+  font-size: 18px;
   color: #555;
 }
 
 .auth-btn {
   width: 100%;
-  padding: 1rem;
+  padding: 16px;
   background-color: #4a90e2;
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -337,4 +333,18 @@
   background-color: #357abd;
   transform: translateY(-1px);
   box-shadow: 0 6px 8px rgba(74, 144, 226, 0.3);
+}
+
+.register-loading {
+  text-align: center;
+  padding: 64px 0;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.image-preview-item {
+  cursor: grab;
+  touch-action: none;
 }

@@ -1,10 +1,5 @@
-// 이 유틸리티 함수는 브라우저 알림(Notification)을 표시하는 기능을 제공합니다.
-export function showBrowserNotification(
-  title: string,
-  options?: NotificationOptions,
-) {
-  if (typeof window === "undefined" || !("Notification" in window))
-    return false;
+export function showBrowserNotification(title: string, options?: NotificationOptions) {
+  if (typeof window === "undefined" || !("Notification" in window)) return false;
 
   try {
     if (Notification.permission === "granted") {
