@@ -1,8 +1,9 @@
 import "./css/app.css";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { NavLink, Routes, Route, useNavigate } from "react-router-dom";
-import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
+import { useAuthStore } from "./store/useAuthStore";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -13,7 +14,7 @@ import ProductRegister from "./pages/ProductRegister";
 // 각 페이지 컴포넌트들을 임포트
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, setUser } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,7 +22,7 @@ function App() {
       setUser(currentUser);
     });
     return () => unsubscribe();
-  }, []);
+  }, [setUser]);
 
   const handleLogout = async () => {
     try {
@@ -42,25 +43,15 @@ function App() {
           </NavLink>
         </h1>
         <nav>
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) => (isActive ? "active" : "")}
-          >
+          <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "")}>
             Home
           </NavLink>
           {" | "}
-          <NavLink
-            to="/mypage"
-            className={({ isActive }) => (isActive ? "active" : "")}
-          >
+          <NavLink to="/mypage" className={({ isActive }) => (isActive ? "active" : "")}>
             내 정보
           </NavLink>
           {" | "}
-          <NavLink
-            to="/products/new"
-            className={({ isActive }) => (isActive ? "active" : "")}
-          >
+          <NavLink to="/products/new" className={({ isActive }) => (isActive ? "active" : "")}>
             상품 등록
           </NavLink>
 
@@ -86,17 +77,11 @@ function App() {
           ) : (
             <>
               {" | "}
-              <NavLink
-                to="/login"
-                className={({ isActive }) => (isActive ? "active" : "")}
-              >
+              <NavLink to="/login" className={({ isActive }) => (isActive ? "active" : "")}>
                 로그인
               </NavLink>
               {" | "}
-              <NavLink
-                to="/signup"
-                className={({ isActive }) => (isActive ? "active" : "")}
-              >
+              <NavLink to="/signup" className={({ isActive }) => (isActive ? "active" : "")}>
                 회원가입
               </NavLink>
             </>

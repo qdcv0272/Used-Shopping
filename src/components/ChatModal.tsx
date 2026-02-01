@@ -1,10 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import {
-  auth,
-  sendMessage,
-  subscribeToMessages,
-  type ChatMessage,
-} from "../firebase";
+import { sendMessage, subscribeToMessages, type ChatMessage } from "../firebase";
+import { useAuthStore } from "../store/useAuthStore";
 import "../css/chatModal.css";
 
 interface ChatModalProps {
@@ -14,16 +10,11 @@ interface ChatModalProps {
   sellerName: string;
 }
 
-export default function ChatModal({
-  isOpen,
-  onClose,
-  chatId,
-  sellerName,
-}: ChatModalProps) {
+export default function ChatModal({ isOpen, onClose, chatId, sellerName }: ChatModalProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const user = auth.currentUser;
+  const { user } = useAuthStore(); // 전역 Auth state 사용
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -60,10 +51,7 @@ export default function ChatModal({
 
   return (
     <div className="chat-modal-overlay" onClick={onClose}>
-      <div
-        className="chat-modal-container"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="chat-modal-container" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="chat-header">
           <h3>{sellerName}님과의 대화</h3>
@@ -77,12 +65,7 @@ export default function ChatModal({
           {messages.map((msg) => {
             const isMyMessage = msg.senderId === user?.uid;
             return (
-              <div
-                key={msg.id}
-                className={`message-bubble ${
-                  isMyMessage ? "my-message" : "other-message"
-                }`}
-              >
+              <div key={msg.id} className={`message-bubble ${isMyMessage ? "my-message" : "other-message"}`}>
                 <div>{msg.text}</div>
                 <div className="message-time">
                   {new Date(msg.createdAt).toLocaleTimeString([], {
@@ -98,12 +81,7 @@ export default function ChatModal({
 
         {/* Input */}
         <form className="chat-input-area" onSubmit={handleSend}>
-          <input
-            type="text"
-            placeholder="메시지를 입력하세요..."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-          />
+          <input type="text" placeholder="메시지를 입력하세요..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
           <button type="submit" disabled={!newMessage.trim()}>
             전송
           </button>

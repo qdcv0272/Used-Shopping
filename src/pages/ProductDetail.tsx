@@ -1,19 +1,15 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  getProduct,
-  getUserProfile,
-  auth,
-  startChat,
-  incrementView,
-  type Product,
-} from "../firebase";
+import { getProduct, getUserProfile, startChat, incrementView, type Product } from "../firebase";
+import { useAuthStore } from "../store/useAuthStore";
 import ChatModal from "../components/ChatModal";
 import "../css/productDetail.css";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuthStore(); // 전역 Auth Store 사용
+
   const [product, setProduct] = useState<Product | null>(null);
   const [sellerNickname, setSellerNickname] = useState("");
   const processedIdRef = useRef<string | null>(null);
@@ -27,11 +23,9 @@ export default function ProductDetail() {
       // 이미 처리된 ID라면 조회수 증가 건너뜀 (Strict Mode 대응)
       if (processedIdRef.current !== id) {
         processedIdRef.current = id;
-        incrementView(id).catch((err) =>
-          console.error("Failed to increment view", err)
-        );
+        incrementView(id).catch((err) => console.error("Failed to increment view", err));
       }
-      
+
       // 상품 정보 가져오기
       getProduct(id).then((data) => {
         setProduct(data);
@@ -51,7 +45,7 @@ export default function ProductDetail() {
 
   const handleChat = async () => {
     if (!product) return;
-    const user = auth.currentUser;
+
     if (!user) {
       alert("로그인이 필요합니다.");
       navigate("/login");
@@ -73,28 +67,18 @@ export default function ProductDetail() {
     }
   };
 
-
-  if (!product)
-    return <div style={{ color: "white", padding: "2rem" }}>Loading...</div>;
+  if (!product) return <div style={{ color: "white", padding: "2rem" }}>Loading...</div>;
 
   return (
     <div className="product-detail-container">
       <div className="detail-layout">
         {/* 왼쪽 컬럼: 이미지 + 사용자 정보 */}
         <div className="left-column">
-          <div className="detail-image-wrapper">
-            {product.images && product.images.length > 0 ? (
-              <img src={product.images[0]} alt={product.title} />
-            ) : (
-              <span>상품 이미지</span>
-            )}
-          </div>
+          <div className="detail-image-wrapper">{product.images && product.images.length > 0 ? <img src={product.images[0]} alt={product.title} /> : <span>상품 이미지</span>}</div>
 
           <div className="user-profile-section">
             <div className="user-avatar">👤</div>
-            <div className="user-name">
-              판매자 : {sellerNickname || product.sellerId}
-            </div>
+            <div className="user-name">판매자 : {sellerNickname || product.sellerId}</div>
           </div>
         </div>
 
@@ -109,9 +93,7 @@ export default function ProductDetail() {
           <div className="detail-meta-info">
             <span className="detail-category">{product.category}</span>
             <span style={{ color: "#ddd" }}>|</span>
-            <span className="detail-price">
-              {product.price.toLocaleString()}원
-            </span>
+            <span className="detail-price">{product.price.toLocaleString()}원</span>
           </div>
 
           <hr className="detail-divider" />
@@ -138,14 +120,7 @@ export default function ProductDetail() {
       </div>
 
       {/* Chat Modal */}
-      {isChatOpen && (
-        <ChatModal
-          isOpen={isChatOpen}
-          onClose={() => setIsChatOpen(false)}
-          chatId={currentChatId}
-          sellerName={sellerNickname || "판매자"}
-        />
-      )}
+      {isChatOpen && <ChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} chatId={currentChatId} sellerName={sellerNickname || "판매자"} />}
     </div>
   );
 }

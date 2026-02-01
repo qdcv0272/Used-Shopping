@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import { onAuthStateChanged, type User } from "firebase/auth";
+import { useForm } from "../hooks/useForm"; // 커스텀 훅 임포트
 
 import "../css/login.css";
 
@@ -10,8 +11,14 @@ type LoginProps = {
 };
 
 export default function Login({ onClose }: LoginProps) {
-  const [id, setId] = useState("");
-  const [password, setPassword] = useState("");
+  // useForm 커스텀 훅 사용하여 폼 상태 관리
+  // 포트폴리오 포인트: 반복되는 input 상태 관리를 커스텀 훅으로 분리하여 재사용성 높임
+  const { values, handleChange, resetForm } = useForm({
+    id: "",
+    password: "",
+  });
+  const { id, password } = values;
+
   const [message, setMessage] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
@@ -41,10 +48,8 @@ export default function Login({ onClose }: LoginProps) {
       const cred = await loginUser(id, password);
 
       // Success
-      setMessage(
-        `로그인 되었습니다: ${cred.user.displayName ?? cred.user.email}`,
-      );
-      setPassword("");
+      setMessage(`로그인 되었습니다: ${cred.user.displayName ?? cred.user.email}`);
+      resetForm(); // 훅에서 제공하는 초기화 함수 사용
 
       if (onClose) {
         onClose();
@@ -74,10 +79,11 @@ export default function Login({ onClose }: LoginProps) {
             <label htmlFor="login-id">아이디</label>
             <input
               id="login-id"
+              name="id" // 식별자
               type="text"
               placeholder="아이디를 입력하세요"
               value={id}
-              onChange={(e) => setId(e.target.value)}
+              onChange={handleChange} // useForm 핸들러
               className="login-input"
             />
           </div>
@@ -86,10 +92,11 @@ export default function Login({ onClose }: LoginProps) {
             <label htmlFor="login-password">비밀번호</label>
             <input
               id="login-password"
+              name="password" // 식별자
               type="password"
               placeholder="비밀번호를 입력하세요"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handleChange} // useForm 핸들러
               className="login-input"
             />
           </div>
