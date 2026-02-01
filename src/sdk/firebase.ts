@@ -1,11 +1,9 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
-import type { User } from "firebase/auth";
+// import type { User } from "firebase/auth";
 import { getFirestore, doc, setDoc, collection, query, where, getDocs, getDoc, addDoc, orderBy, limit, onSnapshot, updateDoc, increment } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
-
-type UserWithFlag = User & { _profileSaved?: boolean };
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -106,7 +104,7 @@ export async function incrementView(id: string) {
   });
 }
 
-export async function createAuthUser(id: string, password: string, email: string) {
+export async function createAuthUser(email: string, password: string) {
   const userCred = await createUserWithEmailAndPassword(auth, email, password);
   const user = userCred.user;
 
@@ -132,7 +130,7 @@ export async function saveUserProfile(uid: string, id: string, email: string, ni
   });
 }
 
-export async function registerUser(id: string, password: string, email?: string, nickname?: string, profile: Record<string, unknown> = {}) {
+export async function registerUser(id: string, password: string, email?: string, nickname?: string, _profile: Record<string, unknown> = {}) {
   // Legacy support or direct register
   const authEmail = email && email.length ? email : `${id}@noemail.local`;
   const userCred = await createUserWithEmailAndPassword(auth, authEmail, password);

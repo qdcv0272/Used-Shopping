@@ -160,7 +160,7 @@ export default function Signup() {
       setMessage("인증 메일 발송 중...");
 
       const { createAuthUser } = await import("../sdk/firebase");
-      await createAuthUser(id, password, email);
+      await createAuthUser(email, password);
 
       setIsVerificationSent(true);
       setMessage("인증 메일이 발송되었습니다.\n메일함에서 인증 링크를 클릭한 후 아래 [인증 완료 확인] 버튼을 눌러주세요.");
