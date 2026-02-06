@@ -4,6 +4,8 @@ import { NavLink, Routes, Route, useNavigate } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./sdk/firebase";
 import { useAuthStore } from "./store/useAuthStore";
+import { useToastStore } from "./store/useToastStore";
+import Toast from "./components/Toast";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -13,6 +15,7 @@ import ProductDetail from "./pages/ProductDetail";
 import ProductRegister from "./pages/ProductRegister";
 
 function App() {
+  const { addToast } = useToastStore();
   const { user, setUser } = useAuthStore();
   const navigate = useNavigate();
 
@@ -26,7 +29,7 @@ function App() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      alert("로그아웃 되었습니다.");
+      addToast("로그아웃 되었습니다.", "success");
       navigate("/");
     } catch (error) {
       console.error("Logout failed", error);
@@ -35,6 +38,7 @@ function App() {
 
   return (
     <div className="App">
+      <Toast />
       <header className="app-header">
         <h1>
           <NavLink to="/" className="nav-logo-link">

@@ -1,8 +1,8 @@
-import { forwardRef } from "react";
-import "../css/login.css";
-import "../css/signup.css";
+import { forwardRef, type InputHTMLAttributes } from "react";
+import "../../css/login.css";
+import "../../css/signup.css";
 
-interface AuthInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface AuthInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   error?: string | null;
   hint?: string;

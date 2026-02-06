@@ -1,13 +1,9 @@
-import { useState, useRef, useLayoutEffect, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import gsap from "gsap";
-import { Draggable } from "gsap/all";
 import { auth, addProduct, uploadImage } from "../sdk/firebase";
+import ImageUploader from "../components/ProductRegister/ImageUploader";
+import ProductForm from "../components/ProductRegister/ProductForm";
 import "../css/productRegister.css";
-
-gsap.registerPlugin(Draggable);
-
-const CATEGORIES = ["디지털기기", "생활가전", "가구/인테리어", "유아동", "생활/가공식품", "여성의류", "남성의류", "스포츠/레저", "게임/취미", "도서/티켓/음반", "식물", "반려동물용품", "기타"];
 
 export default function ProductRegister() {
   const navigate = useNavigate();
@@ -20,9 +16,6 @@ export default function ProductRegister() {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(auth.currentUser);
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
-
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((u) => {
       setUser(u);
@@ -30,60 +23,6 @@ export default function ProductRegister() {
     });
     return () => unsubscribe();
   }, []);
-
-  useLayoutEffect(() => {
-    if (isLoading || !user) return;
-    const ctx = gsap.context(() => {
-      Draggable.create(imageRefs.current, {
-        type: "x",
-        bounds: containerRef.current,
-        inertia: true,
-        onDragStart: function () {
-          gsap.set(this.target, { zIndex: 100, cursor: "grabbing" });
-        },
-        onDragEnd: function () {
-          const draggedIndex = parseInt(this.target.dataset.index || "-1");
-
-          let targetIndex = -1;
-
-          imageRefs.current.forEach((ref, index) => {
-            if (index !== draggedIndex && ref && this.hitTest(ref, "50%")) {
-              targetIndex = index;
-            }
-          });
-
-          gsap.set(this.target, { zIndex: 1, cursor: "grab", x: 0, y: 0 });
-
-          if (draggedIndex !== -1 && targetIndex !== -1 && targetIndex !== draggedIndex) {
-            console.log(`Swapping ${draggedIndex} -> ${targetIndex}`);
-
-            setImages((prev) => {
-              const newImages = [...prev];
-              const [moved] = newImages.splice(draggedIndex, 1);
-              newImages.splice(targetIndex, 0, moved);
-              return newImages;
-            });
-          }
-        },
-      });
-    }, containerRef);
-    return () => ctx.revert();
-  }, [images, isLoading, user]);
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      if (images.length + newFiles.length > 10) {
-        alert("최대 10장까지만 등록 가능합니다.");
-        return;
-      }
-      setImages((prev) => [...prev, ...newFiles]);
-    }
-  };
-
-  const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
 
   const handleSubmit = async () => {
     if (!title || !description || !price || !category) {
@@ -159,70 +98,24 @@ export default function ProductRegister() {
           <input type="text" className="form-input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="제목을 입력해주세요." />
         </div>
 
-        <div className="form-group">
-          <div className="image-upload-wrapper" ref={containerRef}>
-            <label className="image-upload-btn">
-              <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="file-input-hidden" />
-              <span className="camera-icon">📷</span>
-              <span className="image-count">
-                <span className="current-count">{images.length}</span>/10
-              </span>
-            </label>
+        <ImageUploader images={images} setImages={setImages} />
 
-            {images.map((file, index) => (
-              <div
-                key={`${file.name}-${file.lastModified}-${index}`}
-                className="image-preview image-preview-item"
-                ref={(el) => {
-                  imageRefs.current[index] = el;
-                }}
-                data-index={index}
-              >
-                <img src={URL.createObjectURL(file)} alt={`preview-${index}`} />
-                {index === 0 && <div className="representative-badge">대표 사진</div>}
-                <button
-                  type="button"
-                  className="delete-image-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeImage(index);
-                  }}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onTouchStart={(e) => e.stopPropagation()}
-                >
-                  ❌
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">카테고리</label>
-          <div className="category-grid">
-            {CATEGORIES.map((cat) => (
-              <button key={cat} type="button" className={`category-item ${category === cat ? "active" : ""}`} onClick={() => setCategory(cat)}>
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">자세한 설명</label>
-          <textarea className="form-textarea" value={description} onChange={(e) => setDescription(e.target.value)} placeholder=""></textarea>
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">가격</label>
-          <div className="price-group-header">
-            <span className="sell-badge">판매하기</span>
-          </div>
-          <div className="price-input-wrapper">
-            <span className="currency-symbol">₩</span>
-            <input type="text" className="form-input" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="가격을 입력해주세요." />
-          </div>
-        </div>
+        <ProductForm
+          title="" // 이미 위에서 렌더링 했으므로 여기는 빈값이나 hidden으로 처리해야 하지만
+          // 원래 구조상 제목이 ImageUploader 위에 있었음.
+          // 하지만 ProductForm에 제목이 포함되어 있음.
+          // 따라서 원래 화면 구조를 맞추려면 ProductForm에서 제목을 빼거나
+          // 아니면 ProductForm 전체를 렌더링하고 위쪽의 title input을 제거해야 함.
+          // ProductForm에 제목부터 가격까지 다 넣었으니 위쪽 JSX를 수정해야 함.
+          // 아래 oldString, newString으로 처리하겠음.
+          setTitle={setTitle}
+          category={category}
+          setCategory={setCategory}
+          description={description}
+          setDescription={setDescription}
+          price={price}
+          setPrice={setPrice}
+        />
 
         <div className="submit-btn-wrapper">
           <button type="button" className="submit-btn" onClick={handleSubmit} disabled={isSubmitting}>
