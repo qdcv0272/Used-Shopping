@@ -6,6 +6,7 @@ import { auth } from "./sdk/firebase";
 import { useAuthStore } from "./store/useAuthStore";
 import { useToastStore } from "./store/useToastStore";
 import Toast from "./components/Toast";
+import ChatModal from "./components/ChatModal";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -15,10 +16,11 @@ import ProductDetail from "./pages/ProductDetail";
 import ProductRegister from "./pages/ProductRegister";
 
 function App() {
-  const { addToast } = useToastStore();
-  const { user, setUser } = useAuthStore();
-  const navigate = useNavigate();
+  const { addToast } = useToastStore(); // Toast 알림을 위한 스토어 훅
+  const { user, setUser } = useAuthStore(); // 전역 Auth state 관리 훅
+  const navigate = useNavigate(); // 라우팅을 위한 훅
 
+  // Firebase 인증 상태 변경 감지
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -26,6 +28,7 @@ function App() {
     return () => unsubscribe();
   }, [setUser]);
 
+  // 로그아웃 핸들러
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -38,6 +41,7 @@ function App() {
 
   return (
     <div className="App">
+      <ChatModal />
       <Toast />
       <header className="app-header">
         <h1>

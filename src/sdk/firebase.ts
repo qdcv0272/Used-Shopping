@@ -1,9 +1,9 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
-// import type { User } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, setPersistence, browserSessionPersistence } from "firebase/auth";
 import { getFirestore, doc, setDoc, collection, query, where, getDocs, getDoc, addDoc, orderBy, limit, onSnapshot, updateDoc, increment } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
+import { ALL_CATEGORY } from "../constants";
 
 // 1. Firebase 설정 정보 (API 키 등은 환경 변수에서 가져옵니다)
 // .env 파일에 정의된 VITE_FIREBASE_... 값들을 사용해 보안을 유지합니다.
@@ -36,10 +36,10 @@ export async function uploadImage(file: File, folder = "images") {
   const storageRef = ref(storage, `${folder}/${Date.now()}_${file.name}`);
 
   // 파일 업로드 수행
-  const snapshot = await uploadBytes(storageRef, file);
+  const snapshot = await uploadBytes(storageRef, file); // 파일 업로드
 
   // 업로드된 파일의 다운로드 주소(URL) 가져오기
-  const downloadURL = await getDownloadURL(snapshot.ref);
+  const downloadURL = await getDownloadURL(snapshot.ref); // 업로드된 파일의 URL 반환
   return downloadURL;
 }
 
@@ -58,34 +58,33 @@ export interface Product {
   sellerId: string;
   createdAt: number;
   views: number;
-  likes: number;
 }
 
 // 새 상품을 등록하는 함수
 export async function addProduct(productData: Omit<Product, "id">) {
   // 'products' 컬렉션 참조
-  const productsRef = collection(db, "products");
+  const productsRef = collection(db, "products"); // collection 참조
 
   // 데이터 추가 (ID는 자동 생성됨)
-  const docRef = await addDoc(productsRef, productData);
+  const docRef = await addDoc(productsRef, productData); // 문서 추가
   return docRef.id; // 생성된 문서 ID 반환
 }
 
 // 상품 목록을 가져오는 함수 (카테고리 필터 가능)
 export async function getProducts(category?: string) {
-  const productsRef = collection(db, "products");
-  let q;
+  const productsRef = collection(db, "products"); // collection 참조
+  let q; // 쿼리 변수 선언
 
   // 카테고리가 지정되어 있고 '전체'가 아니면 해당 카테고리만 필터링
-  if (category && category !== "전체") {
-    q = query(productsRef, where("category", "==", category));
+  if (category && category !== ALL_CATEGORY) {
+    q = query(productsRef, where("category", "==", category)); // 카테고리 필터링 where 절
   } else {
     // 아니면 전체 목록 최신순 정렬 (최대 20개)
-    q = query(productsRef, orderBy("createdAt", "desc"), limit(20));
+    q = query(productsRef, orderBy("createdAt", "desc"), limit(20)); // 최신순 정렬 및 제한
   }
 
   // 데이터 가져오기 비동기 요청
-  const querySnapshot = await getDocs(q);
+  const querySnapshot = await getDocs(q); // 쿼리 실행 및 결과 가져오기
 
   // 문서 데이터들을 배열 형태로 변환
   const products = querySnapshot.docs.map((doc) => ({
@@ -94,7 +93,7 @@ export async function getProducts(category?: string) {
   })) as Product[];
 
   // 카테고리 필터링 시에는 클라이언트 측에서 최신순 정렬 (복합 인덱스 문제 회피)
-  if (category && category !== "전체") {
+  if (category && category !== ALL_CATEGORY) {
     products.sort((a, b) => b.createdAt - a.createdAt);
   }
 
@@ -132,6 +131,7 @@ export async function getProduct(id: string) {
 
   // 문서가 존재하면 데이터 반환
   if (docSnap.exists()) {
+    // 문서 존재 여부 확인 exists()
     return { id: docSnap.id, ...docSnap.data() } as Product;
   } else {
     return null;
@@ -153,7 +153,10 @@ export async function incrementView(id: string) {
 
 // Firebase Auth에 사용자 생성 (이메일/비번) + 이메일 인증 발송
 export async function createAuthUser(email: string, password: string) {
-  const userCred = await createUserWithEmailAndPassword(auth, email, password);
+  // 세션 지속성 설정: 브라우저 닫으면 로그아웃 처리
+  await setPersistence(auth, browserSessionPersistence);
+
+  const userCred = await createUserWithEmailAndPassword(auth, email, password); // firebase auth 사용자 생성
   const user = userCred.user;
 
   // 이메일 인증 메일 발송
@@ -186,6 +189,9 @@ export async function saveUserProfile(uid: string, id: string, email: string, ni
 
 // 통합 회원가입 함수 (Auth 생성 + 프로필 저장)
 export async function registerUser(id: string, password: string, email?: string, nickname?: string) {
+  // 세션 지속성 설정: 브라우저 닫으면 로그아웃 처리
+  await setPersistence(auth, browserSessionPersistence);
+
   // 이메일이 없으면 가짜 이메일 생성 (id@noemail.local)
   const authEmail = email && email.length ? email : `${id}@noemail.local`;
 
@@ -219,6 +225,9 @@ export async function loginUser(id: string, password: string) {
     const data = userDoc.data() as { authEmail?: string; email?: string };
     const authEmail = data.authEmail ?? data.email ?? `${id}@noemail.local`;
 
+    // 세션 지속성 설정: 브라우저 닫으면 로그아웃 처리
+    await setPersistence(auth, browserSessionPersistence);
+
     // 3. 이메일과 비밀번호로 Firebase 로그인 시도
     return await signInWithEmailAndPassword(auth, authEmail, password);
   } catch (error) {
@@ -247,6 +256,14 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
   const d = await getDoc(doc(db, "users", uid));
   if (!d.exists()) return null;
   return d.data() as UserProfile;
+}
+
+// 중복 확인 함수 (존재하면 true 반환)
+export async function checkFieldDuplicate(field: string, value: string): Promise<boolean> {
+  const usersRef = collection(db, "users");
+  const q = query(usersRef, where(field, "==", value));
+  const querySnapshot = await getDocs(q);
+  return !querySnapshot.empty;
 }
 
 // 사용자 역할 업데이트 (owner 등)
@@ -283,6 +300,7 @@ export interface ChatMessage {
   text: string;
   createdAt: number;
   // Firestore 타임스탬프가 아닌 숫자(밀리초)를 사용함
+  // 타임스탬프란 Firestore에서 제공하는 특수한 날짜/시간 객체
 }
 
 export interface ChatRoom {
@@ -466,8 +484,18 @@ export async function resetPassword(email: string) {
   Firestore(데이터베이스) ⚡
   https://firebase.google.com/docs/firestore/quickstart
 
+  Firestore 실시간 업데이트 & 쿼리 (onSnapshot, where, orderBy) 📡
+  https://firebase.google.com/docs/firestore/query-data/listen
+  https://firebase.google.com/docs/firestore/query-data/queries
+
+  Firestore 보안 규칙 (Security Rules) 🛡️
+  https://firebase.google.com/docs/firestore/security/get-started
+
   Storage(파일 업로드) 📁
   https://firebase.google.com/docs/storage/web/start
+
+  Google Analytics (분석) 📊
+  https://firebase.google.com/docs/analytics/get-started?platform=web
   
   TypeScript / JS 레퍼런스 (API 시그니처 확인용) 🧭
   https://firebase.google.com/docs/reference/js

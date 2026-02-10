@@ -39,19 +39,7 @@ export default function FindIdModal({ onClose }: FindIdModalProps) {
           아이디 찾기
         </button>
 
-        {message && (
-          <div
-            style={{
-              marginTop: "15px",
-              textAlign: "center",
-              color: message.includes("아이디는") ? "green" : "red",
-              fontWeight: "bold",
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {message}
-          </div>
-        )}
+        {message && <div className={`modal-message ${message.includes("아이디는") ? "success" : "error"}`}>{message}</div>}
       </div>
     </Modal>
   );

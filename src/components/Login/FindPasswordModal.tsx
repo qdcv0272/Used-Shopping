@@ -45,19 +45,7 @@ export default function FindPasswordModal({ onClose, onVerified }: FindPasswordM
           확인
         </button>
 
-        {message && (
-          <div
-            style={{
-              marginTop: "15px",
-              textAlign: "center",
-              color: "red",
-              fontWeight: "bold",
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {message}
-          </div>
-        )}
+        {message && <div className="modal-message error">{message}</div>}
       </div>
     </Modal>
   );

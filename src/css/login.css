@@ -313,3 +313,31 @@
   font-size: 12px;
   margin-top: 4px;
 }
+
+/* Footer Styles */
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.footer-divider {
+  color: #aaa;
+}
+
+/* Modal Message Styles */
+.modal-message {
+  margin-top: 15px;
+  text-align: center;
+  font-weight: bold;
+  white-space: pre-wrap;
+}
+
+.modal-message.error {
+  color: red;
+}
+
+.modal-message.success {
+  color: green;
+}

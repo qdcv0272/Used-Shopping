@@ -50,19 +50,7 @@ export default function ChangePasswordModal({ email, onClose }: ChangePasswordMo
           비밀번호 변경
         </button>
 
-        {message && (
-          <div
-            style={{
-              marginTop: "15px",
-              textAlign: "center",
-              color: message.includes("변경되었습니다") || message.includes("전송했습니다") ? "green" : "red",
-              fontWeight: "bold",
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {message}
-          </div>
-        )}
+        {message && <div className={`modal-message ${message.includes("변경되었습니다") || message.includes("전송했습니다") ? "success" : "error"}`}>{message}</div>}
       </div>
     </Modal>
   );

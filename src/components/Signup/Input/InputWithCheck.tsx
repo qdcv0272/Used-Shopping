@@ -1,25 +1,10 @@
-import { forwardRef, type InputHTMLAttributes } from "react";
-import "../../css/login.css";
-import "../../css/signup.css";
+// src/components/Signup/Input/InputWithCheck.tsx
+import { forwardRef } from "react";
+import type { BaseInputProps } from "./BaseInput";
+import "@/css/login.css";
+import "@/css/signup.css";
 
-interface AuthInputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-  error?: string | null;
-  hint?: string;
-}
-
-export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(({ label, id, error, hint, className = "", ...props }, ref) => {
-  return (
-    <div className="field">
-      <span className="label">{label}</span>
-      <input id={id} ref={ref} className={`input ${error ? "invalid" : ""} ${className}`} {...props} />
-      {error && <small className="error-text">{error}</small>}
-      {hint && <small className="hint">{hint}</small>}
-    </div>
-  );
-});
-
-interface AuthInputWithCheckProps extends AuthInputProps {
+interface InputWithCheckProps extends BaseInputProps {
   isChecked: boolean;
   checkMessage?: string | null;
   onCheck: () => void;
@@ -27,7 +12,7 @@ interface AuthInputWithCheckProps extends AuthInputProps {
   checkedButtonLabel?: string;
 }
 
-export const AuthInputWithCheck = forwardRef<HTMLInputElement, AuthInputWithCheckProps>(
+export const InputWithCheck = forwardRef<HTMLInputElement, InputWithCheckProps>(
   ({ label, id, error, isChecked, checkMessage, onCheck, checkButtonLabel = "중복확인", checkedButtonLabel = "완료", className = "", ...props }, ref) => {
     return (
       <div className="field role-field">
@@ -44,3 +29,5 @@ export const AuthInputWithCheck = forwardRef<HTMLInputElement, AuthInputWithChec
     );
   },
 );
+
+InputWithCheck.displayName = "InputWithCheck";

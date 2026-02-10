@@ -46,12 +46,6 @@ export default function Login({ onClose }: LoginProps) {
       setMessage("로그인 중...");
       const cred = await loginUser(id, password);
 
-      if (!cred.user.emailVerified) {
-        await auth.signOut();
-        setMessage("이메일 인증이 완료되지 않았습니다. 가입하신 이메일의 수신함을 확인해주세요.");
-        return;
-      }
-
       setMessage(`로그인 되었습니다: ${cred.user.displayName ?? cred.user.email}`);
       setId("");
       setPassword("");

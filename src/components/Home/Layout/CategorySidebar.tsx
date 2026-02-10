@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 import { useProductFilterStore } from "../../../store/useProductFilterStore";
+import { FILTER_CATEGORIES } from "../../../constants";
 
 type CategorySidebarProps = {
   averagePrice: number;
@@ -13,7 +14,7 @@ export default function CategorySidebar({ averagePrice }: CategorySidebarProps) 
   const [isAnimating, setIsAnimating] = useState(false);
   const categoryListRef = useRef<HTMLUListElement>(null);
 
-  const categories = ["전체", "디지털기기", "생활가전", "가구/인테리어", "생활/주방", "유아동", "의류", "뷰티/미용", "취미/게임", "도서", "기타"];
+  const categories = FILTER_CATEGORIES;
 
   useEffect(() => {
     if (categoryListRef.current) {

@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { getProducts, searchProducts, type Product } from "../sdk/firebase";
 import { useProductFilterStore } from "../store/useProductFilterStore";
+import { useProducts } from "../hooks/useProducts";
+import { ALL_CATEGORY } from "../constants";
 
 import SearchInput from "../components/Home/SearchInput";
 import CategorySidebar from "../components/Home/Layout/CategorySidebar";
@@ -16,31 +17,19 @@ export default function Home() {
 
   const [localSearchTerm, setLocalSearchTerm] = useState(globalSearchTerm);
 
-  const [products, setProducts] = useState<Product[]>([]);
-
+  // 전역 검색어가 변경되면 로컬 검색어도 동기화
   useEffect(() => {
     setLocalSearchTerm(globalSearchTerm);
   }, [globalSearchTerm]);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      if (globalSearchTerm.trim()) {
-        const results = await searchProducts(globalSearchTerm);
-        setProducts(results);
-        return;
-      }
-
-      const data = await getProducts(category === "전체" ? undefined : category);
-      setProducts(data);
-    };
-    fetchProducts();
-  }, [category, globalSearchTerm]);
+  // React Query를 사용한 데이터 페칭
+  const { data: products = [] } = useProducts({ category, searchTerm: globalSearchTerm });
 
   const handleSearch = async (e?: React.FormEvent) => {
     e?.preventDefault();
 
     if (localSearchTerm.trim()) {
-      setCategory("전체");
+      setCategory(ALL_CATEGORY);
       setGlobalSearchTerm(localSearchTerm);
     } else {
       setGlobalSearchTerm("");

@@ -1,50 +1,33 @@
 import { auth } from "../../sdk/firebase";
+import { useSignupStore, selectSignupActions } from "@/store/useSignupStore";
+import { useShallow } from "zustand/react/shallow";
 
+// 액션 버튼 컴포넌트 Props 타입
 type SignupActionButtonsProps = {
-  isVerificationSent: boolean;
-  isVerified: boolean;
-  isSubmitting: boolean;
-  onSendVerification: () => void;
-  onCheckVerification: () => void;
-  onFinalSignup: () => void;
   onCancel: () => void;
 };
 
-export default function SignupActionButtons({ isVerificationSent, isVerified, isSubmitting, onSendVerification, onCheckVerification, onFinalSignup, onCancel }: SignupActionButtonsProps) {
+// 액션 버튼 컴포넌트
+export default function SignupActionButtons({ onCancel }: SignupActionButtonsProps) {
+  const { isVerificationSent, isVerified, isSubmitting, sendVerification, checkVerification, finalSignup } = useSignupStore(useShallow(selectSignupActions));
+
   return (
     <div className="actions">
       {!isVerificationSent && !isVerified && (
-        <button className="btn" type="button" onClick={onSendVerification} disabled={isSubmitting}>
+        <button className="btn" type="button" onClick={sendVerification} disabled={isSubmitting}>
           {isSubmitting ? "처리 중..." : "인증 메일 발송"}
         </button>
       )}
 
       {isVerificationSent && !isVerified && (
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            width: "100%",
-            flexDirection: "column",
-          }}
-        >
-          <p
-            style={{
-              fontSize: "14px",
-              color: "green",
-              textAlign: "center",
-              margin: "5px 0",
-            }}
-          >
-            인증 메일이 발송되었습니다.
-          </p>
-          <button className="btn" type="button" onClick={onCheckVerification} disabled={isSubmitting}>
+        <div className="verification-actions">
+          <p className="verification-message">인증 메일이 발송되었습니다.</p>
+          <button className="btn" type="button" onClick={checkVerification} disabled={isSubmitting}>
             인증 완료 확인
           </button>
           <button
-            className="btn ghost"
+            className="btn ghost resend-btn"
             type="button"
-            style={{ marginTop: "5px" }}
             onClick={async () => {
               try {
                 const { sendEmailVerification } = await import("firebase/auth");
@@ -73,7 +56,7 @@ export default function SignupActionButtons({ isVerificationSent, isVerified, is
       )}
 
       {isVerified && (
-        <button className="btn" type="button" onClick={onFinalSignup} disabled={isSubmitting}>
+        <button className="btn" type="button" onClick={finalSignup} disabled={isSubmitting}>
           회원가입 완료
         </button>
       )}

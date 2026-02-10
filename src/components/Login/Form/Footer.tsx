@@ -10,11 +10,11 @@ export default function Footer({ onFindIdClick, onFindPasswordClick }: FooterPro
 
   return (
     <div className="login-footer">
-      <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "10px" }}>
+      <div className="footer-links">
         <span className="link-text" onClick={onFindIdClick}>
           아이디 찾기
         </span>
-        <span style={{ color: "#aaa" }}>|</span>
+        <span className="footer-divider">|</span>
         <span className="link-text" onClick={onFindPasswordClick}>
           비밀번호 찾기
         </span>

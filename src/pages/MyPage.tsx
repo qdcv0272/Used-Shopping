@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, getUserProfile, getProductsBySeller, getMyChats, getProduct, markChatAsRead, type Product, type ChatRoom, type UserProfile } from "../sdk/firebase";
-import ChatModal from "../components/ChatModal";
+import { useChatStore } from "../store/useChatStore";
 import ProfileCard from "../components/MyPage/ProfileCard";
 import ChatList from "../components/MyPage/ChatList";
 import MyProductList from "../components/MyPage/MyProductList";
@@ -9,6 +9,7 @@ import "../css/myPage.css";
 
 export default function MyPage() {
   const navigate = useNavigate();
+  const { openChat: openChatModal } = useChatStore();
 
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -17,9 +18,6 @@ export default function MyPage() {
   const [chats, setChats] = useState<ChatRoom[]>([]);
   const [chatPartners, setChatPartners] = useState<Record<string, string>>({});
   const [chatProducts, setChatProducts] = useState<Record<string, string>>({});
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [currentChatId, setCurrentChatId] = useState("");
-  const [currentChatName, setCurrentChatName] = useState("");
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -69,9 +67,7 @@ export default function MyPage() {
   }, []);
 
   const openChat = async (chatId: string, partnerName: string) => {
-    setCurrentChatId(chatId);
-    setCurrentChatName(partnerName);
-    setIsChatOpen(true);
+    openChatModal(chatId, partnerName);
 
     await markChatAsRead(chatId);
 
@@ -103,8 +99,6 @@ export default function MyPage() {
       <ChatList chats={chats} partners={chatPartners} productNames={chatProducts} currentUserId={auth.currentUser?.uid} onOpenChat={openChat} />
 
       <MyProductList products={myProducts} onProductClick={(id) => navigate(`/products/${id}`)} />
-
-      {isChatOpen && <ChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} chatId={currentChatId} sellerName={currentChatName} />}
     </div>
   );
 }

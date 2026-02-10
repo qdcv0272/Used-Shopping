@@ -1,17 +1,9 @@
-const CATEGORIES = ["디지털기기", "생활가전", "가구/인테리어", "유아동", "생활/가공식품", "여성의류", "남성의류", "스포츠/레저", "게임/취미", "도서/티켓/음반", "식물", "반려동물용품", "기타"];
+import { CATEGORIES } from "../../constants";
+import { useProductRegisterStore } from "../../store/useProductRegisterStore";
 
-type ProductFormProps = {
-  title: string;
-  setTitle: (value: string) => void;
-  category: string;
-  setCategory: (value: string) => void;
-  description: string;
-  setDescription: (value: string) => void;
-  price: string;
-  setPrice: (value: string) => void;
-};
+export default function ProductForm() {
+  const { title, setTitle, category, setCategory, description, setDescription, price, setPrice } = useProductRegisterStore();
 
-export default function ProductForm({ title, setTitle, category, setCategory, description, setDescription, price, setPrice }: ProductFormProps) {
   return (
     <>
       <div className="form-group">

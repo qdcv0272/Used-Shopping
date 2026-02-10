@@ -1,16 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { sendMessage, subscribeToMessages, type ChatMessage } from "../sdk/firebase";
 import { useAuthStore } from "../store/useAuthStore";
+import { useChatStore } from "../store/useChatStore";
 import "../css/chatModal.css";
 
-interface ChatModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  chatId: string;
-  sellerName: string;
-}
-
-export default function ChatModal({ isOpen, onClose, chatId, sellerName }: ChatModalProps) {
+export default function ChatModal() {
+  const { isOpen, closeChat, chatId, partnerName } = useChatStore();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -34,9 +29,13 @@ export default function ChatModal({ isOpen, onClose, chatId, sellerName }: ChatM
     return () => unsubscribe();
   }, [isOpen, chatId]);
 
+  const handleClose = () => {
+    closeChat();
+  };
+
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !chatId) return;
 
     try {
       await sendMessage(chatId, newMessage);
@@ -50,11 +49,11 @@ export default function ChatModal({ isOpen, onClose, chatId, sellerName }: ChatM
   if (!isOpen) return null;
 
   return (
-    <div className="chat-modal-overlay" onClick={onClose}>
+    <div className="chat-modal-overlay" onClick={handleClose}>
       <div className="chat-modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="chat-header">
-          <h3>{sellerName}님과의 대화</h3>
-          <button className="close-btn" onClick={onClose}>
+          <h3>{partnerName}님과의 대화</h3>
+          <button className="close-btn" onClick={handleClose}>
             &times;
           </button>
         </div>

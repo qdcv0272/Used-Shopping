@@ -1,3 +1,4 @@
+// 아이디 형식 검사
 export const validateIdFormat = (value: string): string | null => {
   if (!value) return "아이디를 입력하세요.";
   if (!/^[A-Za-z0-9]+$/.test(value)) {
@@ -10,6 +11,7 @@ export const validateIdFormat = (value: string): string | null => {
   return null;
 };
 
+// 닉네임 형식 검사
 export const validateNicknameFormat = (value: string): string | null => {
   if (!value) return "닉네임을 입력하세요.";
   if (value.length < 2) {
@@ -18,6 +20,7 @@ export const validateNicknameFormat = (value: string): string | null => {
   return null;
 };
 
+// 이메일 형식 검사
 export const validateEmailFormat = (value: string): string | null => {
   if (!value) return "이메일을 입력하세요.";
   if (!/^\S+@\S+\.\S+$/.test(value)) {
@@ -26,6 +29,7 @@ export const validateEmailFormat = (value: string): string | null => {
   return null;
 };
 
+// 비밀번호 형식 검사
 export const validatePasswordFormat = (value: string): string | null => {
   if (!value) return "비밀번호를 입력하세요.";
   if (value.length < 6) {
@@ -41,6 +45,7 @@ export const validatePasswordFormat = (value: string): string | null => {
   return null;
 };
 
+// 비밀번호 확인 형식 검사
 export const validateConfirmFormat = (value: string, password: string): string | null => {
   if (value !== password) {
     return "비밀번호가 일치하지 않습니다.";

@@ -1,15 +1,12 @@
 import { useRef, useLayoutEffect } from "react";
 import gsap from "gsap";
 import { Draggable } from "gsap/all";
+import { useProductRegisterStore } from "../../store/useProductRegisterStore";
 
 gsap.registerPlugin(Draggable);
 
-type ImageUploaderProps = {
-  images: File[];
-  setImages: React.Dispatch<React.SetStateAction<File[]>>;
-};
-
-export default function ImageUploader({ images, setImages }: ImageUploaderProps) {
+export default function ImageUploader() {
+  const { images, setImages } = useProductRegisterStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -36,8 +33,6 @@ export default function ImageUploader({ images, setImages }: ImageUploaderProps)
           gsap.set(this.target, { zIndex: 1, cursor: "grab", x: 0, y: 0 });
 
           if (draggedIndex !== -1 && targetIndex !== -1 && targetIndex !== draggedIndex) {
-            console.log(`Swapping ${draggedIndex} -> ${targetIndex}`);
-
             setImages((prev) => {
               const newImages = [...prev];
               const [moved] = newImages.splice(draggedIndex, 1);
