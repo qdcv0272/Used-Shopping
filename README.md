@@ -272,3 +272,43 @@ src/
 ├── pages/                 # React Router 기준의 메인 페이지 뷰
 └── sdk/                   # Firebase 초기화 및 인스턴스 (firebase.ts)
 ```
+
+---
+
+## 🧪 테스트 (Testing)
+
+**[Vitest](https://vitest.dev/) + [Testing Library](https://testing-library.com/)** 기반의 단위 테스트를 작성했습니다.  
+Firebase 외부 의존성이 없는 **순수 함수, Zustand 스토어, 커스텀 훅** 위주로 핵심 비즈니스 로직을 검증합니다.
+
+### 테스트 실행 방법
+
+```bash
+# 워치 모드 (파일 변경 감지하며 자동 재실행)
+npm test
+
+# 1회 실행 후 종료 (CI 환경)
+npm run test:run
+```
+
+### 테스트 파일 구성 (34 tests)
+
+| 파일                                      | 테스트 대상                | 케이스 수 |
+| ----------------------------------------- | -------------------------- | :-------: |
+| `src/utils/validators.test.ts`            | 폼 유효성 검사 순수 함수   |    18     |
+| `src/store/useToastStore.test.ts`         | 토스트 알림 Zustand 스토어 |     7     |
+| `src/store/useProductFilterStore.test.ts` | 상품 필터 Zustand 스토어   |     4     |
+| `src/hooks/useForm.test.ts`               | 폼 상태 관리 커스텀 훅     |     5     |
+
+### 테스트 전략 및 대상 선정 이유
+
+**순수 함수 (`validators.ts`)**  
+아이디·닉네임·이메일·비밀번호·비밀번호 확인에 대한 유효성 검사 로직은 외부 의존성이 전혀 없는 순수 함수입니다. 입력값에 따른 에러 메시지 반환 여부를 가장 단순하고 명확하게 테스트할 수 있어 우선적으로 작성했습니다.
+
+**Zustand 스토어 (`useProductFilterStore`, `useToastStore`)**  
+클라이언트 상태를 담당하는 두 스토어는 Firebase 등 외부 API를 호출하지 않아 격리된 환경에서 테스트가 가능합니다.
+
+- `useProductFilterStore`: 카테고리 변경, 검색어 변경, 필터 초기화 동작을 검증합니다.
+- `useToastStore`: 토스트 추가/삭제, 기본 type 적용, `duration` 옵션에 따른 자동 제거(`vi.useFakeTimers`)를 검증합니다.
+
+**커스텀 훅 (`useForm`)**  
+`renderHook` + `act`를 사용해 React 렌더링 컨텍스트 내에서 훅의 상태 변경 흐름을 검증합니다. 필드 변경, 독립성, 초기화, 일괄 변경을 포함한 5가지 케이스를 다룹니다.
